@@ -678,8 +678,8 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u958B\u767C\u5718\u968A\uFF1AGoogle Gemini\u3001\u8CC7\u61C9\u7CFB\u5927\u56DB
-    \u9673\u8FEA\u7152\n\u6307\u5C0E\u8001\u5E2B\uFF1A\u90ED\u9F8D \u6559\u6388\n\u7279\u5225\u611F\u8B1D&\u8CC7\u6E90\u51FA\u8655\uFF1A\n\u97F3\u6548\u751F\u6210\uFF1A<color=#5599FF><u><link=\"https://sfxr.me/\">jsfxr
+  m_text: "\u958B\u767C\u5718\u968A\uFF1A\u8CC7\u61C9\u7CFB\u5927\u56DB \u9673\u8FEA\u7152\n\u6307\u5C0E\u8001\u5E2B\uFF1A\u90ED\u9F8D
+    \u52A9\u7406\u6559\u6388\n\u7279\u5225\u611F\u8B1D&\u8CC7\u6E90\u51FA\u8655\uFF1A\n\u97F3\u6548\u751F\u6210\uFF1A<color=#5599FF><u><link=\"https://sfxr.me/\">jsfxr
     (sfxr.me)</link></u></color>\n\u4E2D\u6587\u5B57\u9AD4\uFF1A\u6559\u80B2\u90E8\u5B98\u7DB2\n\u7D20\u6750\u4F7F\u7528\uFF1A<color=#5599FF><u><link=\"https://www.kenney.nl/assets/tiny-dungeon\">kenney
     tiny dungeon</link></u></color>\u3001<color=#5599FF><u><link=\"https://assetstore.unity.com/packages/2d/gui/violet-themed-ui-235559\">Violet
     Themed UI</link></u></color>\n"

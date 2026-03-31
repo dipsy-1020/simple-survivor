@@ -5,7 +5,7 @@ public class EnemySpawner : MonoBehaviour
     [Header("怪物預製物清單")]
     public GameObject basicEnemy; // 普通小怪
     public GameObject eliteEnemy; // 紫色菁英怪 (稍微硬一點、數量少)
-    public GameObject dashEnemy;  // 會衝刺的小怪 (掛了 DashSkill 的)
+    public GameObject BatEnemy;  // 蝙蝠
     public GameObject bossPrefab; // 紅色大 Boss
 
     [Header("生成範圍設定")]
@@ -18,7 +18,7 @@ public class EnemySpawner : MonoBehaviour
     [Header("關卡時間軸 (秒)")]
     public float phase2Time = 180f; // 第 3 分鐘：壓力開始增加
     public float phase3Time = 360f; // 第 6 分鐘：菁英與衝刺怪加入
-    public float bossTime = 600f;   // 第 10 分鐘：Boss 降臨
+    public float bossTime = 540f;   // 第 9 分鐘：Boss 降臨
 
     private float timer = 0f;
     private bool bossSpawned = false;
@@ -88,7 +88,7 @@ public class EnemySpawner : MonoBehaviour
         else if (time >= phase3Time)
         {
             float rand = Random.value;
-            if (rand < 0.1f) enemyToSpawn = dashEnemy; // 10% 衝刺怪
+            if (rand < 0.1f) enemyToSpawn = BatEnemy; // 10% 衝刺怪
             else if (rand < 0.3f) enemyToSpawn = eliteEnemy; // 20% 菁英怪
         }
 

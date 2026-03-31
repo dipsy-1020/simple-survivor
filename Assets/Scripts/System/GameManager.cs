@@ -5,14 +5,31 @@ using TMPro; // ✨ 處理 TextMeshPro 必備！
 public class GameManager : MonoBehaviour
 {
     [Header("UI 介面")]
+    public GameObject startPanel;    // ✨ 新增：開場玩法說明面板
     public GameObject gameOverPanel;
     public GameObject victoryPanel; // ✨ 新增：勝利畫面
     public TextMeshProUGUI timerText; // ✨ 新增：畫面上方的計時器文字
 
     [Header("遊戲時間設定")]
     public float gameTime = 0f; // 遊戲已經進行的總秒數
-    public float winTime = 300f; // 獲勝目標時間 (預設 300 秒 = 5 分鐘)
+    public float winTime = 600f; // 獲勝目標時間 (預設 300 秒 = 5 分鐘)
     private bool isGameOver = false; // 防止重複觸發結算
+    private bool isGameStarted = false; // ✨ 新增：判斷遊戲是否正式開始
+
+    void Awake()
+    {
+        // ✨ 遊戲剛開始時先暫停，顯示說明面板
+        Time.timeScale = 0f;
+        startPanel.SetActive(true);
+    }
+
+    // ✨ 新增：按下開場面板的「開始」按鈕呼叫此 function
+    public void StartGame()
+    {
+        isGameStarted = true;
+        Time.timeScale = 1f;
+        startPanel.SetActive(false);
+    }
 
     void Update()
     {

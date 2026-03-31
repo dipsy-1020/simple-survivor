@@ -1,7 +1,7 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class EnemyDamage : MonoBehaviour
 {
-    [Header("§ðÀ»¤O³]©w")]
-    public int damage = 10; // ¼²¨ì¥D¨¤®É·|¦©¦h¤Ö¦å
+    [Header("æ”»æ“ŠåŠ›è¨­å®š")]
+    public int damage = 10; // æ’žåˆ°ä¸»è§’æ™‚æœƒæ‰£å¤šå°‘è¡€
 }

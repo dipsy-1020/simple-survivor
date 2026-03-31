@@ -18,6 +18,7 @@ public enum UpgradeType
 public class UpgradeOption
 {
     public string upgradeName;
+    public Sprite icon; // ✨ 新增這行：用來放圖片 (Icon)
     [TextArea]
     public string description;
     public UpgradeType type;
@@ -36,6 +37,7 @@ public class UpgradeManager : MonoBehaviour
     public Button[] optionButtons;
     public TextMeshProUGUI[] titleTexts;
     public TextMeshProUGUI[] descTexts;
+    public Image[] iconImages; // ✨ 新增這行：用來綁定 UI 上的圖片元件
 
     [Header("升級庫設定")]
     public List<UpgradeOption> upgradePool;
@@ -139,6 +141,18 @@ public class UpgradeManager : MonoBehaviour
                     titleTexts[i].text = selectedOption.upgradeName;
 
                 descTexts[i].text = selectedOption.description;
+
+                // ✨ 新增這段：把圖片換上去
+                if (selectedOption.icon != null)
+                {
+                    iconImages[i].sprite = selectedOption.icon;
+                    iconImages[i].gameObject.SetActive(true); // 確保圖片有顯示
+                }
+                else
+                {
+                    iconImages[i].gameObject.SetActive(false); // 如果沒放圖片就隱藏
+                }
+
                 optionButtons[i].onClick.RemoveAllListeners();
                 optionButtons[i].onClick.AddListener(() => ApplyUpgrade(selectedOption));
                 validPool.RemoveAt(randomIndex);

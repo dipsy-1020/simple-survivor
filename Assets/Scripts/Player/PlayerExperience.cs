@@ -45,18 +45,18 @@ public class PlayerExperience : MonoBehaviour
 
     void LevelUp()
     {
-        currentExp -= maxExp; // 扣除消耗，保留溢出
-        maxExp = Mathf.RoundToInt(maxExp * 1.5f); // 下一級需求變高
+        // 1. 扣除升級所需的經驗，並增加下一級的門檻
+        currentExp -= maxExp;
+        maxExp = Mathf.RoundToInt(maxExp * 1.5f); // 讓下一級更難升
 
-        // 升級後重新刷新 UI
-        UpdateExpBarUI();
-
-        // ✨ 新增這行：呼叫 AudioManager 播放升級聲音
-        if (AudioManager.instance != null) AudioManager.instance.PlayLevelUp();
-
-        if (upgradeManager != null)
+        // 2. ✨ 呼叫 UpgradeManager 直接給予三圍微升級 (不暫停遊戲！)
+        UpgradeManager um = FindObjectOfType<UpgradeManager>();
+        if (um != null)
         {
-            upgradeManager.ShowUpgradeMenu();
+            um.ApplyMicroUpgrade();
         }
+
+        // 3. 更新 UI
+        // UpdateExpUI();
     }
 }

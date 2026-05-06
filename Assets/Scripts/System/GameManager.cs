@@ -1,95 +1,120 @@
 ﻿using UnityEngine;
 using UnityEngine.SceneManagement;
-using TMPro; // ✨ 處理 TextMeshPro 必備！
+using TMPro;
 
 public class GameManager : MonoBehaviour
 {
-    [Header("UI 介面")]
-    public GameObject startPanel;    // ✨ 新增：開場玩法說明面板
-    public GameObject gameOverPanel;
-    public GameObject victoryPanel; // ✨ 新增：勝利畫面
-    public TextMeshProUGUI timerText; // ✨ 新增：畫面上方的計時器文字
+    // ✨ 單例模式，方便其他腳本 (如玩家血量) 呼叫 GameOver
+    public static GameManager instance;
 
-    [Header("遊戲時間設定")]
-    public float gameTime = 0f; // 遊戲已經進行的總秒數
-    public float winTime = 600f; // 獲勝目標時間 (預設 300 秒 = 5 分鐘)
-    private bool isGameOver = false; // 防止重複觸發結算
-    private bool isGameStarted = false; // ✨ 新增：判斷遊戲是否正式開始
+    [Header("UI 介面")]
+    public GameObject startPanel;
+    public GameObject gameOverPanel;
+    public GameObject victoryPanel;
+    public TextMeshProUGUI timerText;
+
+    [Header("波次設定 (渡劫系統)")]
+    public int currentWave = 1;
+    public int maxWaves = 10;          // 總共 10 波
+    public float waveDuration = 60f;   // 每波 60 秒
+    private float waveTimer;
+
+    private bool isGameOver = false;
 
     void Awake()
     {
-        // ✨ 遊戲剛開始時先暫停，顯示說明面板
-        Time.timeScale = 0f;
-        startPanel.SetActive(true);
+        if (instance == null) instance = this;
     }
 
-    // ✨ 新增：按下開場面板的「開始」按鈕呼叫此 function
-    public void StartGame()
+    void Start()
     {
-        isGameStarted = true;
+        // 遊戲開始時，初始化第一波的時間
+        waveTimer = waveDuration;
+
+        // 如果有開始畫面，請根據你的設計決定要不要先暫停。這裡預設遊戲直接開始。
         Time.timeScale = 1f;
-        startPanel.SetActive(false);
+        UpdateTimerUI();
     }
 
     void Update()
     {
-        // 如果遊戲還沒結束，時間就繼續走
-        if (!isGameOver)
-        {
-            gameTime += Time.deltaTime;
-            UpdateTimerUI();
+        // 如果遊戲結束或已經暫停（例如正在選升級），就不繼續倒數
+        if (isGameOver || Time.timeScale <= 0f) return;
 
-            // 檢查是否達到獲勝目標時間
-            if (gameTime >= winTime)
+        // 波次倒數計時
+        waveTimer -= Time.deltaTime;
+        UpdateTimerUI();
+
+        // 當這波時間結束時！
+        if (waveTimer <= 0f)
+        {
+            if (currentWave < maxWaves)
             {
-                ShowVictory();
+                // 1. 進入下一波
+                currentWave++;
+                waveTimer = waveDuration;
+
+                // 2. ✨ 核心機制：呼叫 UpgradeManager 彈出「渡劫抉擇面板」！
+                UpgradeManager um = FindObjectOfType<UpgradeManager>();
+                if (um != null)
+                {
+                    um.ShowBaneMenu();
+                }
+                else
+                {
+                    Debug.LogWarning("場上找不到 UpgradeManager，無法跳出渡劫面板！");
+                }
+            }
+            else
+            {
+                // 如果已經是最後一波（第 10 波）且倒數完畢，代表玩家存活下來了！
+                Victory();
             }
         }
     }
 
-    // ✨ 將單調的秒數轉換為 00:00 的漂亮格式
+    // 更新畫面上方的 UI 文字
     void UpdateTimerUI()
     {
         if (timerText != null)
         {
-            // 算出分鐘數與秒數
-            int minutes = Mathf.FloorToInt(gameTime / 60F);
-            int seconds = Mathf.FloorToInt(gameTime - minutes * 60);
+            // 將剩餘秒數無條件進位，顯示得比較好看
+            int secondsLeft = Mathf.CeilToInt(waveTimer);
 
-            // string.Format 會把數字填進 {0} 跟 {1} 裡，:00 代表必定顯示兩位數 (如 05:09)
-            timerText.text = string.Format("{0:00}:{1:00}", minutes, seconds);
+            // 顯示格式例如：「第 1 / 10 波 | 剩餘：45 秒」
+            timerText.text = $"第 {currentWave} / {maxWaves} 波 | 剩餘：{secondsLeft} 秒";
         }
     }
 
-    public void ShowGameOver()
+    public void GameOver()
     {
         if (isGameOver) return;
-        isGameOver = true;
 
-        gameOverPanel.SetActive(true);
+        isGameOver = true;
         Time.timeScale = 0f;
+        if (gameOverPanel != null) gameOverPanel.SetActive(true);
     }
 
-    // ✨ 新增：觸發勝利的邏輯
-    public void ShowVictory()
+    public void Victory()
     {
         if (isGameOver) return;
+
         isGameOver = true;
-
-        victoryPanel.SetActive(true);
-        Time.timeScale = 0f; // 凍結時間
-
-        // 把畫面上所有的敵人都清掉 (選做，讓勝利畫面更乾淨)
-        GameObject[] enemies = GameObject.FindGameObjectsWithTag("Enemy");
-        foreach (GameObject enemy in enemies)
-        {
-            Destroy(enemy);
-        }
+        Time.timeScale = 0f;
+        if (victoryPanel != null) victoryPanel.SetActive(true);
     }
 
+    // 給 UI 按鈕綁定的重新開始方法
     public void RestartGame()
     {
         Time.timeScale = 1f;
         SceneManager.LoadScene(SceneManager.GetActiveScene().name);
+    }
+
+    // 給 UI 按鈕綁定的返回主選單方法 (假設你的主選單場景叫 "MainMenu")
+    public void ReturnToMenu()
+    {
+        Time.timeScale = 1f;
+        SceneManager.LoadScene("MainMenu");
     }
 }

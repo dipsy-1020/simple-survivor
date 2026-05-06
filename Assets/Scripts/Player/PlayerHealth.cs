@@ -39,17 +39,6 @@ public class PlayerHealth : MonoBehaviour
         }
     }
 
-    // 碰撞扣血邏輯 (維持不變，但記得確保怪物 Collider 不是 Trigger)
-    void OnCollisionStay2D(Collision2D collision)
-    {
-        if (collision.gameObject.CompareTag("Enemy") && invincibilityTimer <= 0)
-        {
-            EnemyDamage enemyDmg = collision.gameObject.GetComponent<EnemyDamage>();
-            int damageAmount = (enemyDmg != null) ? enemyDmg.damage : 10;
-            TakeDamage(damageAmount);
-        }
-    }
-
     public void TakeDamage(int damage)
     {
         currentHealth -= damage;
@@ -81,6 +70,7 @@ public class PlayerHealth : MonoBehaviour
     {
         if (tombstonePrefab != null) Instantiate(tombstonePrefab, transform.position, Quaternion.identity);
         gameObject.SetActive(false);
-        FindObjectOfType<GameManager>().ShowGameOver();
+        // ✨ 修改這裡：直接呼叫單例
+        if (GameManager.instance != null) GameManager.instance.GameOver();
     }
 }

@@ -74,8 +74,8 @@ public class EnemyHealth : MonoBehaviour
 
         if (isBoss)
         {
-            GameManager gm = FindObjectOfType<GameManager>();
-            if (gm != null) gm.ShowVictory();
+            // ✨ 修改這裡：直接呼叫單例
+            if (GameManager.instance != null) GameManager.instance.Victory();
         }
     }
 }

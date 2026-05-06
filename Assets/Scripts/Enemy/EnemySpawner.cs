@@ -1,116 +1,90 @@
 ﻿using UnityEngine;
+using System.Collections.Generic;
 
 public class EnemySpawner : MonoBehaviour
 {
-    [Header("怪物預製物清單")]
-    public GameObject basicEnemy; // 普通小怪
-    public GameObject eliteEnemy; // 紫色菁英怪 (稍微硬一點、數量少)
-    public GameObject BatEnemy;  // 蝙蝠
-    public GameObject bossPrefab; // 紅色大 Boss
+    // 單例模式：讓升級系統可以隨時呼叫它塞入新怪物
+    public static EnemySpawner instance;
 
-    [Header("生成範圍設定")]
-    public float minMapX = -20f;
-    public float maxMapX = 20f;
-    public float minMapY = -20f;
-    public float maxMapY = 20f;
-    public float spawnRadius = 15f;
+    [Header("生成設定")]
+    [Tooltip("這是一個純白色的基礎怪物 Prefab，身上不掛任何大腦(AI)，只掛血量與剛體")]
+    public GameObject baseMonsterPrefab;
+    public float spawnInterval = 2f;
+    private float spawnTimer;
+    public Transform[] spawnPoints;
 
-    [Header("關卡時間軸 (秒)")]
-    public float phase2Time = 180f; // 第 3 分鐘：壓力開始增加
-    public float phase3Time = 360f; // 第 6 分鐘：菁英與衝刺怪加入
-    public float bossTime = 540f;   // 第 9 分鐘：Boss 降臨
+    [Header("當前怪物陣容 (卡池)")]
+    // 這裡存放目前波次會出現的所有怪物食譜
+    public List<MonsterData> activeMonsterRoster = new List<MonsterData>();
 
-    private float timer = 0f;
-    private bool bossSpawned = false;
-    private Transform player;
-    private GameManager gameManager;
+    [Tooltip("第一波的預設基礎怪物食譜，請在面板拖曳進來")]
+    public MonsterData initialMonster;
+
+    void Awake()
+    {
+        if (instance == null) instance = this;
+    }
 
     void Start()
     {
-        GameObject p = GameObject.FindGameObjectWithTag("Player");
-        if (p != null) player = p.transform;
-        gameManager = FindObjectOfType<GameManager>();
+        // 確保第一波有怪可以生
+        if (initialMonster != null && activeMonsterRoster.Count == 0)
+        {
+            activeMonsterRoster.Add(initialMonster);
+        }
     }
 
     void Update()
     {
-        if (player == null || gameManager == null) return;
+        if (activeMonsterRoster.Count == 0 || baseMonsterPrefab == null) return;
 
-        float currentTime = gameManager.gameTime;
-
-        // --- 🏆 終極階段：Boss 降臨判定 ---
-        if (currentTime >= bossTime && !bossSpawned)
+        spawnTimer += Time.deltaTime;
+        if (spawnTimer >= spawnInterval)
         {
-            SpawnBoss();
-            return; // 讓這一幀先去生 Boss
-        }
-
-        // --- ⏳ 日常生成階段 ---
-        timer += Time.deltaTime;
-
-        // 取得當下的生怪間隔時間 (越後面越短)
-        float currentInterval = GetSpawnInterval(currentTime);
-
-        if (timer >= currentInterval)
-        {
-            SpawnNormalEnemies(currentTime);
-            timer = 0f;
+            SpawnEnemy();
+            spawnTimer = 0f;
         }
     }
 
-    // 核心魔法 1：根據時間，平滑縮短生怪間隔 (使用 Mathf.Lerp)
-    float GetSpawnInterval(float time)
+    void SpawnEnemy()
     {
-        // 0 ~ 3 分鐘：間隔從 1.5 秒縮短到 1.0 秒
-        if (time < phase2Time) return Mathf.Lerp(1.5f, 1.0f, time / phase2Time);
+        // 1. 從卡池隨機抽一張食譜
+        MonsterData chosenData = activeMonsterRoster[Random.Range(0, activeMonsterRoster.Count)];
 
-        // 3 ~ 6 分鐘：間隔從 1.0 秒縮短到 0.5 秒 (怪開始變多)
-        if (time < phase3Time) return Mathf.Lerp(1.0f, 0.5f, (time - phase2Time) / (phase3Time - phase2Time));
+        // 2. 隨機選一個生成點
+        Transform sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
 
-        // 6 ~ 10 分鐘：間隔從 0.5 秒縮短到 0.2 秒 (怪海成型！)
-        if (time < bossTime) return Mathf.Lerp(0.5f, 0.2f, (time - phase3Time) / (bossTime - phase3Time));
+        // 3. 生成沒有靈魂的純白色基礎模型
+        GameObject newEnemy = Instantiate(baseMonsterPrefab, sp.position, Quaternion.identity);
 
-        // Boss 戰期間：稍微放緩生怪速度 (1.5秒一隻)，讓玩家專心單挑 Boss
-        return 1.5f;
-    }
+        // 4. 灌入食譜資料：改顏色與大小
+        SpriteRenderer sr = newEnemy.GetComponent<SpriteRenderer>();
+        if (sr != null) sr.color = chosenData.monsterColor;
+        newEnemy.transform.localScale = Vector3.one * chosenData.scaleMultiplier;
 
-    // 核心魔法 2：根據時間，決定抽出哪一種怪
-    void SpawnNormalEnemies(float time)
-    {
-        GameObject enemyToSpawn = basicEnemy; // 預設都是普通小怪
+        // 寫入血量
+        EnemyHealth health = newEnemy.GetComponent<EnemyHealth>();
+        if (health != null) health.maxHealth = chosenData.maxHealth;
 
-        // 第 3 分鐘後：20% 機率混入菁英怪
-        if (time >= phase2Time && time < phase3Time)
+        // 5. 根據食譜掛載大腦與攻擊模組
+        switch (chosenData.brainType)
         {
-            if (Random.value < 0.2f) enemyToSpawn = eliteEnemy;
+            case MonsterData.AIType.StraightChaser:
+                EnemyController ec = newEnemy.AddComponent<EnemyController>();
+                ec.moveSpeed = chosenData.moveSpeed;
+                if (chosenData.useMeleeAttack) newEnemy.AddComponent<MeleeAttackModule>();
+                break;
+
+            case MonsterData.AIType.SpiderCharge:
+                SpiderAI spider = newEnemy.AddComponent<SpiderAI>();
+                spider.normalSpeed = chosenData.moveSpeed;
+                break;
+
+            case MonsterData.AIType.BatKite:
+                BatAI bat = newEnemy.AddComponent<BatAI>();
+                bat.moveSpeed = chosenData.moveSpeed;
+                // 注意：這裡先預設掛載，之後要讓蝙蝠能射擊，還需要把子彈 Prefab 寫入發射模組
+                break;
         }
-        // 第 6 分鐘後：增加會衝刺的怪物
-        else if (time >= phase3Time)
-        {
-            float rand = Random.value;
-            if (rand < 0.1f) enemyToSpawn = BatEnemy; // 10% 衝刺怪
-            else if (rand < 0.3f) enemyToSpawn = eliteEnemy; // 20% 菁英怪
-        }
-
-        if (enemyToSpawn != null) InstantiateEnemy(enemyToSpawn);
-    }
-
-    void InstantiateEnemy(GameObject prefab)
-    {
-        Vector2 randomDir = Random.insideUnitCircle.normalized;
-        Vector3 spawnPos = player.position + new Vector3(randomDir.x, randomDir.y, 0f) * spawnRadius;
-
-        // 限制在牆壁內
-        spawnPos.x = Mathf.Clamp(spawnPos.x, minMapX, maxMapX);
-        spawnPos.y = Mathf.Clamp(spawnPos.y, minMapY, maxMapY);
-
-        Instantiate(prefab, spawnPos, Quaternion.identity);
-    }
-
-    void SpawnBoss()
-    {
-        bossSpawned = true;
-        InstantiateEnemy(bossPrefab);
-        Debug.Log("⚠️ 10分鐘已到，終極 Boss 降臨！");
     }
 }

@@ -15,7 +15,8 @@ GameObject:
   - component: {fileID: 3847683507201224696}
   - component: {fileID: 4461164490341458778}
   - component: {fileID: 2567263284413013945}
-  - component: {fileID: 653620957113835519}
+  - component: {fileID: -6764018557273571796}
+  - component: {fileID: 8278755764275135286}
   m_Layer: 0
   m_Name: BossEnemy
   m_TagString: Enemy
@@ -217,11 +218,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::BossAI
   moveSpeed: 1.5
-  projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}
-  shootCooldown: 5
-  minionPrefab: {fileID: 2672398028805854079, guid: 2e3c68f83a175cc4f968ec21fbfe66ca, type: 3}
-  summonCooldown: 8
---- !u!114 &653620957113835519
+  bulletDamage: 20
+  attackInterval: 4
+--- !u!114 &-6764018557273571796
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -230,7 +229,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 7406142201519373201}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 772543f704ca86e4598a9609f5e85666, type: 3}
+  m_Script: {fileID: 11500000, guid: d4e94fab57a8305499db0711a22bbafa, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyDamage
-  damage: 15
+  m_EditorClassIdentifier: Assembly-CSharp::UniversalDamageHitbox
+  damage: 10
+  targetTag: Player
+  destroyOnHit: 0
+--- !u!114 &8278755764275135286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7406142201519373201}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddfb72f611313a44caec2ae521faf879, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileAttackModule
+  projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}
+  firePoint: {fileID: 2589849487986813951}

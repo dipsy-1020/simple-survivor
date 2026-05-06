@@ -1,97 +1,67 @@
-using UnityEngine;
+ï»¿using UnityEngine;
+using System.Collections;
 
+[RequireComponent(typeof(MeleeAttackModule))] // âœ¨ ç¶å®šè¿‘æˆ°æ¨¡çµ„
 public class SpiderAI : MonoBehaviour
 {
-    [Header("°òÂ¦³]©w")]
+    [Header("åŸºç¤è¨­å®š")]
     private Transform player;
-    public float normalSpeed = 2f;    // ¥­±`¨«¸ôªº³t«×
+    public float normalSpeed = 2f;
+    public float chargeDistance = 6f; // è·é›¢å¤šè¿‘æ™‚é–‹å§‹è“„åŠ›
 
-    [Header("¬ğ¶i (Dash) ³]©w")]
-    public float dashRange = 4.5f;    // ¶ZÂ÷ª±®a¦hªñ®É¡A¶}©l·Ç³Æ¼³¹L¥h
-    public float dashSpeed = 12f;     // ¼³¹L¥hªºÀş¶¡³t«× («D±`§Ö)
-    public float dashDuration = 0.2f; // ©¹«e¼³ªº®É¶¡ªø«×
-    public float prepareTime = 0.6f;  // ¼³¤§«e¡u°±¹y»W¤O¡vªº®É¶¡ (µ¹ª±®a¤ÏÀ³)
-    public float cooldownTime = 1.5f; // ¼³§¹¤§«á¡A¦b­ì¦a³İ®§ªº®É¶¡
+    [Header("æŠ€èƒ½æ™‚é–“è»¸")]
+    public float prepTime = 0.5f;     // æ–½æ”¾å‰çš„è“„åŠ›è­¦å‘Šæ™‚é–“
+    public float cooldown = 3f;       // è¡æ’å®Œçš„å–˜æ¯æ™‚é–“
 
-    // ª¬ºA¾÷¡G°l³v¡B»W¤O·Ç³Æ¡B½Ä¨ë¤¤¡B§N«o¤¤
-    private enum SpiderState { Chasing, Preparing, Dashing, Cooldown }
-    private SpiderState currentState = SpiderState.Chasing;
-
-    private float stateTimer = 0f;
-    private Vector2 dashDirection; // ¬ö¿ı¼³¹L¥hªº¤è¦V
+    private MeleeAttackModule meleeModule;
+    private bool isAttacking = false; // æ˜¯å¦æ­£åœ¨èµ°æ”»æ“Šæµç¨‹
 
     void Start()
     {
-        // ¤@¥X¥Í´N§äª±®a
         GameObject p = GameObject.FindGameObjectWithTag("Player");
         if (p != null) player = p.transform;
+
+        // æŠ“å–èº«ä¸Šçš„è¿‘æˆ°æ¨¡çµ„
+        meleeModule = GetComponent<MeleeAttackModule>();
     }
 
     void Update()
     {
-        if (player == null) return;
+        if (player == null || isAttacking) return;
 
-        // ®Ú¾Ú»jµï¥Ø«eªº¡uª¬ºA¡v¨M©w¨e­n°µ¤°»ò
-        switch (currentState)
+        float distance = Vector2.Distance(transform.position, player.position);
+
+        if (distance <= chargeDistance)
         {
-            case SpiderState.Chasing:
-                // 1. °l³vª¬ºA¡GºCºC¨«¦Vª±®a
-                transform.position = Vector2.MoveTowards(transform.position, player.position, normalSpeed * Time.deltaTime);
-
-                // ¦pªG¶ZÂ÷°÷ªñ¤F¡A¤Á´«¨ì¡u»W¤O·Ç³Æ¡vª¬ºA
-                if (Vector2.Distance(transform.position, player.position) <= dashRange)
-                {
-                    ChangeState(SpiderState.Preparing);
-                }
-                break;
-
-            case SpiderState.Preparing:
-                // 2. »W¤Oª¬ºA¡G¯¸¦b­ì¦a¤£°Ê¡A®É¶¡­Ë¼Æ
-                stateTimer -= Time.deltaTime;
-                if (stateTimer <= 0)
-                {
-                    // »W¤O§¹²¦¡IÂê©wª±®a²{¦bªº¤è¦V¡A·Ç³Æµo®g¦Û¤v
-                    dashDirection = (player.position - transform.position).normalized;
-                    ChangeState(SpiderState.Dashing);
-                }
-                break;
-
-            case SpiderState.Dashing:
-                // 3. ½Ä¨ëª¬ºA¡GµLµøª±®a¦ì¸m¡A´Â­è­èÂê©wªº¤è¦V°ª³t¬ğ¶i
-                transform.Translate(dashDirection * dashSpeed * Time.deltaTime, Space.World);
-                stateTimer -= Time.deltaTime;
-
-                // ½Ä¨ë®É¶¡µ²§ô¡A¤Á´«¨ì¡u§N«o¡vª¬ºA
-                if (stateTimer <= 0)
-                {
-                    ChangeState(SpiderState.Cooldown);
-                }
-                break;
-
-            case SpiderState.Cooldown:
-                // 4. §N«oª¬ºA¡G¯¸¦b­ì¦a³İ®§
-                stateTimer -= Time.deltaTime;
-                if (stateTimer <= 0)
-                {
-                    ChangeState(SpiderState.Chasing); // ³İ§¹®ğ¡AÄ~Äò°l¡I
-                }
-                break;
+            // é€²å…¥æ”»æ“Šç¯„åœï¼Œå¤§è…¦é–‹å§‹åŸ·è¡Œæ”»æ“Šç‹€æ…‹æ©Ÿ
+            StartCoroutine(AttackStateRoutine());
+        }
+        else
+        {
+            // è·é›¢ä¸å¤ ï¼Œç¹¼çºŒç·©æ…¢è¿½æ“Šç©å®¶
+            transform.position = Vector2.MoveTowards(transform.position, player.position, normalSpeed * Time.deltaTime);
         }
     }
 
-    // ¥Î¨Ó¤Á´«ª¬ºA»P­«¸m­p®É¾¹ªº¤u¨ã
-    void ChangeState(SpiderState newState)
+    IEnumerator AttackStateRoutine()
     {
-        currentState = newState;
-        if (newState == SpiderState.Preparing) stateTimer = prepareTime;
-        else if (newState == SpiderState.Dashing) stateTimer = dashDuration;
-        else if (newState == SpiderState.Cooldown) stateTimer = cooldownTime;
-    }
+        isAttacking = true;
 
-    // ¦b½s¿è¾¹µe¥X§ğÀ»½d³ò¬õ°é¡A¤è«K§A½Õ¾ã¶ZÂ÷
-    void OnDrawGizmosSelected()
-    {
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, dashRange);
+        // 1. åœé “è“„åŠ› (çµ¦ç©å®¶é è­¦)
+        // é€™è£¡å¯ä»¥åŠ ä¸Š Sprite é–ƒçˆè®Šç´…çš„è¦–è¦ºæç¤º
+        yield return new WaitForSeconds(prepTime);
+
+        if (player != null)
+        {
+            // 2. é–å®šæ–¹å‘ï¼Œå¤§è…¦ä¸‹ä»¤çªé€²ï¼
+            Vector2 dashDirection = (player.position - transform.position).normalized;
+            meleeModule.Attack(dashDirection);
+        }
+
+        // 3. åŸåœ°å–˜æ¯å†·å»
+        // ç­‰å¾…è¡åˆºæ™‚é–“åŠ ä¸Šé¡å¤–çš„å†·å»æ™‚é–“
+        yield return new WaitForSeconds(cooldown);
+
+        isAttacking = false;
     }
 }

@@ -15,7 +15,8 @@ GameObject:
   - component: {fileID: 406420904497541689}
   - component: {fileID: 1447870009946359537}
   - component: {fileID: 5611316936054573885}
-  - component: {fileID: 8365794773887501813}
+  - component: {fileID: -7722387385117449873}
+  - component: {fileID: 6404518446821744536}
   m_Layer: 0
   m_Name: Spider_Enemy
   m_TagString: Enemy
@@ -207,12 +208,10 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::SpiderAI
   normalSpeed: 2
-  dashRange: 6
-  dashSpeed: 12
-  dashDuration: 0.2
-  prepareTime: 0.6
-  cooldownTime: 1.5
---- !u!114 &8365794773887501813
+  chargeDistance: 6
+  prepTime: 0.5
+  cooldown: 3
+--- !u!114 &-7722387385117449873
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -221,7 +220,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 2672398028805854079}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 772543f704ca86e4598a9609f5e85666, type: 3}
+  m_Script: {fileID: 11500000, guid: d4e94fab57a8305499db0711a22bbafa, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyDamage
+  m_EditorClassIdentifier: Assembly-CSharp::UniversalDamageHitbox
   damage: 10
+  targetTag: Player
+  destroyOnHit: 0
+--- !u!114 &6404518446821744536
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2672398028805854079}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2e3da9bd924a7a24b806ae8e8dea2343, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MeleeAttackModule
+  dashForce: 10
+  dashDuration: 0.3

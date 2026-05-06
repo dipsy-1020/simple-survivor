@@ -15,7 +15,8 @@ GameObject:
   - component: {fileID: 8084422271064396769}
   - component: {fileID: 5041412130837656656}
   - component: {fileID: 2682232323012651147}
-  - component: {fileID: 7824381234476892510}
+  - component: {fileID: 5501253208759480820}
+  - component: {fileID: 1624160831314408623}
   m_Layer: 0
   m_Name: Bat_Enemy
   m_TagString: Enemy
@@ -35,8 +36,7 @@ Transform:
   m_LocalPosition: {x: 2.9612498, y: 1.2347494, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 1528969059710248543}
+  m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3481796872167772058
@@ -221,10 +221,9 @@ MonoBehaviour:
   stoppingDistance: 5
   swaySpeed: 2
   swayAmount: 1.5
-  projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}
-  firePoint: {fileID: 1528969059710248543}
+  attackDamage: 10
   fireRate: 2
---- !u!114 &7824381234476892510
+--- !u!114 &5501253208759480820
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -233,38 +232,23 @@ MonoBehaviour:
   m_GameObject: {fileID: 1839627409398573780}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 772543f704ca86e4598a9609f5e85666, type: 3}
+  m_Script: {fileID: 11500000, guid: d4e94fab57a8305499db0711a22bbafa, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyDamage
+  m_EditorClassIdentifier: Assembly-CSharp::UniversalDamageHitbox
   damage: 10
---- !u!1 &4807413497682132968
-GameObject:
+  targetTag: Player
+  destroyOnHit: 0
+--- !u!114 &1624160831314408623
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 1528969059710248543}
-  m_Layer: 0
-  m_Name: FirePoint
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &1528969059710248543
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4807413497682132968}
-  serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.009, y: -0.106, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 3438747982292954777}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_GameObject: {fileID: 1839627409398573780}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ddfb72f611313a44caec2ae521faf879, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ProjectileAttackModule
+  projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}
+  firePoint: {fileID: 3438747982292954777}

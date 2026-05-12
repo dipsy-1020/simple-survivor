@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI; // ✨ 記得引入 UI 模組
+using TMPro; // ✨ 記得引入
 
 public class PlayerExperience : MonoBehaviour
 {
@@ -9,6 +10,9 @@ public class PlayerExperience : MonoBehaviour
 
     [Header("UI 綁定")]
     public Image expBarFill; // ✨ 綁定填滿條
+    public TextMeshProUGUI levelText; // ✨ 新增：顯示目前等級或經驗值
+
+    private int currentLevel = 1; // ✨ 新增記錄等級
 
     private UpgradeManager upgradeManager;
 
@@ -41,6 +45,12 @@ public class PlayerExperience : MonoBehaviour
             // 計算百分比並更新 Image 的 Fill Amount
             expBarFill.fillAmount = (float)currentExp / maxExp;
         }
+
+        // ✨ 更新文字，例如 "Lv. 5"
+        if (levelText != null)
+        {
+            levelText.text = $"Lv. {currentLevel}";
+        }
     }
 
     void LevelUp()
@@ -48,6 +58,7 @@ public class PlayerExperience : MonoBehaviour
         // 1. 扣除升級所需的經驗，並增加下一級的門檻
         currentExp -= maxExp;
         maxExp = Mathf.RoundToInt(maxExp * 1.5f); // 讓下一級更難升
+        currentLevel++; // ✨ 升級加 1
 
         // 2. ✨ 呼叫 UpgradeManager 直接給予三圍微升級 (不暫停遊戲！)
         UpgradeManager um = FindObjectOfType<UpgradeManager>();

@@ -1,87 +1,66 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
-/// <summary>
-/// ¸U¥Î¶Ë®`Ä²µo¾¹¼Ò²Õ¡C
-/// ¥i¥H±¾¦b¥ô¦ó»İ­n³y¦¨¶Ë®`ªºª«¥ó¤W¡]¤l¼u¡B¼Ä¤Hªº¤â¡B¥D¨¤ªº¼C¡^¡C
-/// ³z¹L targetTag ¨M©w¥¦¯à¶Ë®`½Ö¡C
-/// </summary>
 public class UniversalDamageHitbox : MonoBehaviour
 {
-    [Header("¶Ë®`³]©w")]
+    [Header("å‚·å®³è¨­å®š")]
     public int damage = 10;
-
-    [Tooltip("¶ñ¤J­n§ğÀ»ªº¹ï¶H¼ĞÅÒ¡A¨Ò¦p 'Player' ©Î 'Enemy'")]
-    public string targetTag = "Player"; // ¹w³]§ğÀ»ª±®a¡A±¾¦b­¸¼C¤W®É½Ğ§ï¬° "Enemy"
-
-    [Header("¦æ¬°³]©w")]
-    [Tooltip("¦pªG¥´¤¤¥Ø¼Ğ«á¡A³o­Óª«¥ó¬O§_­n¦Û§Ú·´·À¡H¡]¤l¼u³q±`­n¤Ä¡A¼C©Î©Çª«ªº¨­Åé¤£¤Ä¡^")]
+    public GameObject damageTextPrefab;
+    public string targetTag = "Player";
     public bool destroyOnHit = false;
 
-    // ³B²z Trigger Ä²µo (¾A¥Î©ó¤l¼u¡B­¸¼Cµ¥³]¬° isTrigger ªº¸I¼²Åé)
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        DealDamage(other.gameObject);
-    }
+    public int pierceCount = 0;
+    public int bounceCount = 0; // âœ¨ æ–°å¢ï¼šå½ˆå°„æ¬¡æ•¸
 
-    // ³B²zª«²z¸I¼² (¾A¥Î©ó¹êÅé©Çª«¼²À»)
-    private void OnCollisionEnter2D(Collision2D collision)
-    {
-        DealDamage(collision.gameObject);
-    }
+    private void OnTriggerEnter2D(Collider2D other) { DealDamage(other.gameObject); }
+    private void OnCollisionEnter2D(Collision2D collision) { DealDamage(collision.gameObject); }
 
-    // ±N«ùÄò¶Ë®`¾ã¦X¦b¤@°_¡A´î¤Ö­«½Æ¥N½X
-    private void OnTriggerStay2D(Collider2D other)
-    {
-        // ­Y»İ­n«ùÄò¶Ë®`¡]¨Ò¦p©Çª«ªº¨­Åé¤@ª½ÂHµÛ¥D¨¤¡^¡A¥i¦b¦¹©I¥s
-        // ¦ı³q±`¬°¤FÁ×§KÀş¶¡¦©¤Ó¦h¦å¡A³Q§ğÀ»¤è·|¹ê§@¡uµL¼Ä´V (I-frame)¡v
-        DealDamage(other.gameObject);
-    }
-
-    private void OnCollisionStay2D(Collision2D collision)
-    {
-        DealDamage(collision.gameObject);
-    }
-
-    // ®Ö¤ß¶Ë®`§P©wÅŞ¿è
     private void DealDamage(GameObject targetObj)
     {
-        // ÀË¬d¹ï¤è¬O§_¬°§Ú­Ì³]©wªº¥Ø¼Ğ¼ĞÅÒ
         if (targetObj.CompareTag(targetTag))
         {
-            // ¹Á¸ÕÀò¨ú¥Ø¼Ğ¨­¤Wªº¦å¶q¨t²Î (³o¸Ì­n­İ®eª±®a©M©Çª«ªº¦å¶q¸}¥»)
-            // ¥¼¨Ó¬°¤F§ó§¹¬üªº¼Ò²Õ¤Æ¡A¥i¥H±N PlayerHealth ©M EnemyHealth ©â¶H¥X¤@­Ó IDamageable ¤¶­±
-            // ¦ı¥Ø«e§Ú­Ì¥i¥H¥ÎÂ²³æªº if §PÂ_¨Ó³B²z
-
             if (targetTag == "Player")
             {
                 PlayerHealth playerHp = targetObj.GetComponent<PlayerHealth>();
-                if (playerHp != null)
-                {
-                    // ³o¸Ì°²³] PlayerHealth ¦³¤@­Ó¤½¶}ªº TakeDamage ¤èªk
-                    // §A»İ­n½T»{§A­ì¨Óªº PlayerHealth.cs ¸Ì¬O§_¦³ public void TakeDamage(int damage)
-                    playerHp.TakeDamage(damage);
-                    HitResolution();
-                }
+                if (playerHp != null) { playerHp.TakeDamage(damage); HitResolution(targetObj); }
             }
             else if (targetTag == "Enemy")
             {
                 EnemyHealth enemyHp = targetObj.GetComponent<EnemyHealth>();
                 if (enemyHp != null)
                 {
-                    // ³o¸Ì°²³] EnemyHealth ¦³¤@­Ó¤½¶}ªº TakeDamage ¤èªk
                     enemyHp.TakeDamage(damage);
-                    HitResolution();
+                    if (damageTextPrefab != null)
+                    {
+                        GameObject textObj = Instantiate(damageTextPrefab, targetObj.transform.position, Quaternion.identity);
+                        DamageText dmgText = textObj.GetComponent<DamageText>();
+                        if (dmgText != null) dmgText.Setup(damage);
+                    }
+                    HitResolution(targetObj);
                 }
             }
         }
     }
 
-    // ³B²z¥´¤¤«áªº«áÄò°Ê§@ (¨Ò¦p¤l¼u¦Û§Ú·´·À)
-    private void HitResolution()
+    private void HitResolution(GameObject hitObj)
     {
         if (destroyOnHit)
         {
-            Destroy(gameObject);
+            // âœ¨ ç©¿é€å„ªå…ˆï¼
+            if (pierceCount > 0)
+            {
+                pierceCount--;
+            }
+            // âœ¨ ç©¿é€æ²’äº†ï¼Œæ‰æª¢æŸ¥å½ˆå°„ï¼
+            else if (bounceCount > 0)
+            {
+                bounceCount--;
+                EnemyProjectile proj = GetComponent<EnemyProjectile>();
+                if (proj != null) proj.BounceToNearestEnemy(hitObj); // å‘¼å«å½ˆå°„è½‰å‘
+            }
+            else
+            {
+                Destroy(gameObject); // å…©è€…éƒ½æ²’äº†ï¼Œå®‰æ¯å§
+            }
         }
     }
 }

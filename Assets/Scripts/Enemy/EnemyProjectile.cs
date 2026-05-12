@@ -5,21 +5,47 @@ public class EnemyProjectile : MonoBehaviour
     [Header("子彈設定")]
     public float speed = 5f;
     public float lifeTime = 5f;
-
     private Vector2 flyDirection;
 
-    // 讓 ProjectileAttackModule 呼叫，用來設定飛行方向
     public void Initialize(Vector2 direction)
     {
         flyDirection = direction.normalized;
-
-        // 子彈生成後，確保它幾秒後會自動消失，避免塞爆記憶體
+        float angle = Mathf.Atan2(flyDirection.y, flyDirection.x) * Mathf.Rad2Deg;
+        transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
         Destroy(gameObject, lifeTime);
     }
 
     void Update()
     {
-        // 每一幀朝著設定好的方向等速飛行
         transform.Translate(flyDirection * speed * Time.deltaTime, Space.World);
+    }
+
+    // ✨ 新增：彈射尋敵雷達
+    public void BounceToNearestEnemy(GameObject ignoreEnemy)
+    {
+        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 10f); // 彈射索敵半徑 10 公尺
+        float shortestDistance = Mathf.Infinity;
+        GameObject nearestEnemy = null;
+
+        foreach (Collider2D hit in hitColliders)
+        {
+            // 找敵人，且不能是剛剛打中的那隻(防止原地卡死)
+            if (hit.CompareTag("Enemy") && hit.gameObject != ignoreEnemy)
+            {
+                float distance = Vector2.Distance(transform.position, hit.transform.position);
+                if (distance < shortestDistance)
+                {
+                    shortestDistance = distance;
+                    nearestEnemy = hit.gameObject;
+                }
+            }
+        }
+
+        if (nearestEnemy != null)
+        {
+            // 找到新目標，重新設定方向！
+            Vector2 newDirection = (nearestEnemy.transform.position - transform.position).normalized;
+            Initialize(newDirection);
+        }
     }
 }

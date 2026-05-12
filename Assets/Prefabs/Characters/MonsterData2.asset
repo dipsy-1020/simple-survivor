@@ -1,0 +1,25 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 348c5ab282986fb489c7076e17c4d20e, type: 3}
+  m_Name: MonsterData2
+  m_EditorClassIdentifier: Assembly-CSharp::MonsterData
+  monsterName: "\u666E\u901A\u8759\u8760"
+  monsterSprite: {fileID: 6091706668691328248, guid: 5995f0912264c2a4b8da6237d0318310, type: 3}
+  monsterColor: {r: 1, g: 1, b: 1, a: 1}
+  scaleMultiplier: 1
+  tier: 0
+  maxHealth: 19
+  moveSpeed: 3.5
+  useMeleeAttack: 0
+  useRangeAttack: 1
+  projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}
+  brainType: 2

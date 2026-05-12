@@ -9,15 +9,17 @@ public class EnemyHealth : MonoBehaviour
     public int maxHealth = 30;
     public int currentHealth;
 
+    [Header("防雙判無敵時間")]
+    public float invincibilityDuration = 0.2f; // ✨ 核心修復：0.2 秒內不會受到重複傷害
+    private float invincibilityTimer = 0f;
+
     [Header("掉落物設定")]
     public GameObject gemPrefab;
-    // ✨ 新增這行：讓你在 Inspector 可以選擇這隻怪掉哪種寶石
     public Gem.GemTier dropTier = Gem.GemTier.Small;
     public int gemDropCount = 1;
     public float scatterRadius = 0.8f;
 
-    [Header("✨ 新增：視覺特效設定")]
-    // ✨ 新增：用來裝我們剛剛捏好的粒子預製物
+    [Header("視覺特效設定")]
     public GameObject deathEffectPrefab;
 
     private DamageFlash damageFlash;
@@ -28,13 +30,25 @@ public class EnemyHealth : MonoBehaviour
         damageFlash = GetComponent<DamageFlash>();
     }
 
+    // ✨ 新增 Update 來倒數無敵時間
+    void Update()
+    {
+        if (invincibilityTimer > 0)
+        {
+            invincibilityTimer -= Time.deltaTime;
+        }
+    }
+
     public void TakeDamage(int damage)
     {
+        // ✨ 核心修復：如果還在無敵時間內，直接跳出，拒絕雙判！
+        if (invincibilityTimer > 0) return;
+
         currentHealth -= damage;
+        invincibilityTimer = invincibilityDuration; // 刷新無敵時間
 
         if (damageFlash != null) damageFlash.CallFlash();
 
-        // ✨ 新增這行：呼叫 AudioManager 播放打擊音效！
         if (AudioManager.instance != null) AudioManager.instance.PlayHitSound();
 
         if (currentHealth <= 0) Die();
@@ -42,15 +56,11 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        // ✨ 新增核心魔法：在怪物死掉的座標，生成死亡粒子特效！
         if (deathEffectPrefab != null)
         {
-            // 在怪物的當前位置 (transform.position) 生成粒子
-            // 這裡不需要旋轉 (Quaternion.identity)
             Instantiate(deathEffectPrefab, transform.position, Quaternion.identity);
-
-            // ⚠️ 註：我們不需要寫 Destroy(particle)，因為我們在粒子系統裡設了 Stop Action = Destroy！
         }
+
         if (gemPrefab != null)
         {
             for (int i = 0; i < gemDropCount; i++)
@@ -58,10 +68,7 @@ public class EnemyHealth : MonoBehaviour
                 Vector2 randomOffset = Random.insideUnitCircle * scatterRadius;
                 Vector3 dropPosition = transform.position + new Vector3(randomOffset.x, randomOffset.y, 0f);
 
-                // ✨ 把生出來的寶石先存進一個變數裡
                 GameObject droppedGem = Instantiate(gemPrefab, dropPosition, Quaternion.identity);
-
-                // ✨ 抓取它身上的 Gem 腳本，並依照我們設定的階級幫它「變身」！
                 Gem gemScript = droppedGem.GetComponent<Gem>();
                 if (gemScript != null)
                 {
@@ -74,7 +81,6 @@ public class EnemyHealth : MonoBehaviour
 
         if (isBoss)
         {
-            // ✨ 修改這裡：直接呼叫單例
             if (GameManager.instance != null) GameManager.instance.Victory();
         }
     }

@@ -1,52 +1,28 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
-/// <summary>
-/// ¸U¥Î»·µ{µo®g¼Ò²Õ (¦æ¬°¼h)¡C
-/// ¥u­t³d¡u¥Í¦¨¤l¼u¨Ã½á¤©¤è¦V»P¶Ë®`¡v¡A¤£¥]§t¥ô¦ó§N«o®É¶¡©Î¯Á¼Ä§PÂ_ (¥æ¥Ñ AI ¤j¸£­t³d)¡C
-/// </summary>
 public class ProjectileAttackModule : MonoBehaviour
 {
-    [Header("µo®g³]©w")]
-    [Tooltip("­nµo®gªº¤l¼u Prefab (°O±o¤W­±­n±¾ UniversalDamageHitbox ©M²¾°Ê¸}¥»)")]
+    [Header("ç™¼å°„è¨­å®š")]
     public GameObject projectilePrefab;
-
-    [Tooltip("¤l¼uªº¥Í¦¨¦ì¸m")]
     public Transform firePoint;
 
-    /// <summary>
-    /// °õ¦æ®gÀ» (¥Ñ¤j¸£©I¥s)
-    /// </summary>
-    /// <param name="direction">¤l¼u­¸¦æªº¤è¦V (±`ºA¤Æ¦V¶q)</param>
-    /// <param name="damage">³oµo¤l¼uªº¶Ë®`</param>
-    /// <param name="targetTag">­n§ğÀ»ªº¥Ø¼Ğ¼ĞÅÒ ("Player" ©Î "Enemy")</param>
-    public void Fire(Vector2 direction, int damage, string targetTag)
+    // âœ¨ æ–°å¢æ¥æ”¶ bounceCount åƒæ•¸
+    public void Fire(Vector2 direction, int damage, string targetTag, int pierceCount = 0, int bounceCount = 0)
     {
-        if (projectilePrefab == null || firePoint == null)
-        {
-            Debug.LogWarning("µo®g¼Ò²Õ¯Ê¤Ö Prefab ©Î FirePoint¡I");
-            return;
-        }
-
-        // 1. ¥Í¦¨¤l¼u¹êÅé
+        if (projectilePrefab == null || firePoint == null) return;
         GameObject bullet = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
 
-        // 2. ½á¤©¤l¼u²¾°Ê¤è¦V
-        // ®Ú¾Ú§Ú­Ì²{¦³ªº EnemyProjectile ¸}¥»¡A§Ú­Ì©I¥s¥¦ªº Initialize ¨Ó¶Ç»¼¤è¦V
         EnemyProjectile projScript = bullet.GetComponent<EnemyProjectile>();
-        if (projScript != null)
-        {
-            // ±N­ì¥» EnemyProjectile ¸Ìªº Initialize ¤èªkµy§@­×§ï¡AÅı¥¦¥uºŞ±µ¦¬¤è¦V»P³t«×
-            projScript.Initialize(direction);
-        }
+        if (projScript != null) projScript.Initialize(direction);
 
-        // 3. °ÊºA³]©w³oµo¤l¼uªº¡u¸U¥Î¶Ë®`Ä²µo¾¹¡v
-        // ³o´N¬O¼Ò²Õ¤ÆªºÅ]ªk¡G¦pªGª±®aµo®g¡A¼ĞÅÒ´N·|³Q³]¬° "Enemy"¡F¦pªG¬O½¿½»µo®g¡A´N·|¬O "Player"
         UniversalDamageHitbox hitbox = bullet.GetComponent<UniversalDamageHitbox>();
         if (hitbox != null)
         {
             hitbox.damage = damage;
             hitbox.targetTag = targetTag;
-            hitbox.destroyOnHit = true; // ½T«O»·µ{¤l¼u¥´¤¤¥Ø¼Ğ«á·|¦Û§Ú·´·À
+            hitbox.destroyOnHit = true;
+            hitbox.pierceCount = pierceCount;
+            hitbox.bounceCount = bounceCount; // âœ¨ è³¦äºˆå½ˆå°„æ¬¡æ•¸
         }
     }
 }

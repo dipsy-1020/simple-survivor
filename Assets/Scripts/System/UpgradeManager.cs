@@ -2,16 +2,24 @@
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
-using System.Collections;
 
+// ✨ 包含所有流派與彈射的升級選項
 public enum UpgradeType
 {
-    SwordCount,
-    SwordSpeed,
-    SwordDamage,
-    HealPlayer,
-    SwordSize,
-    UltimateSword // 終極進化飛劍
+    UnlockRotatingSword,
+    UnlockFlyingSword,
+
+    DamageUp,
+    MaxHealthUp,
+
+    RotatingSwordCount,
+    RotatingSwordSpeed,
+    RotatingSwordSize,
+
+    FlyingSwordFireRate,
+    FlyingSwordCount,
+    FlyingSwordPierce,
+    FlyingSwordBounce    // ✨ 飛劍彈射機制
 }
 
 [System.Serializable]
@@ -19,181 +27,343 @@ public class UpgradeOption
 {
     public string upgradeName;
     public Sprite icon;
-    [TextArea]
-    public string description;
     public UpgradeType type;
+
+    [Header("解鎖前置條件 (沒解鎖不會出現)")]
+    public bool requiresRotatingSword;
+    public bool requiresFlyingSword;
 
     public int maxLevel = 0;
     [HideInInspector] public int currentLevel = 0;
-    public bool isUltimate = false;
 }
 
 public class UpgradeManager : MonoBehaviour
 {
+    public static UpgradeManager instance;
+
     [Header("UI 介面")]
     public GameObject upgradePanel;
-
-    [Header("隨機抽卡 UI 綁定")]
     public Button[] optionButtons;
     public TextMeshProUGUI[] titleTexts;
     public TextMeshProUGUI[] descTexts;
     public Image[] iconImages;
+    public Image[] baneIconImages;
 
-    [Header("升級庫設定")]
+    [Header("✨ 局內強化圖示清單 (Loadout UI)")]
+    public GameObject iconPrefab;
+    public Transform iconContainer;
+    private Dictionary<UpgradeType, Image> activeIconUI = new Dictionary<UpgradeType, Image>();
+
+    [HideInInspector] public bool hasRotatingSword = false;
+    [HideInInspector] public bool hasFlyingSword = false;
+    [HideInInspector] public int extraSwordDamage = 0;
+
+    [Header("開局固定流派設定 (二選一)")]
+    public UpgradeOption initialBuffA;
+    public MonsterData initialBaneA;
+    [Space(10)]
+    public UpgradeOption initialBuffB;
+    public MonsterData initialBaneB;
+
+    [Header("升級庫設定 (玩家 Buff)")]
     public List<UpgradeOption> upgradePool;
 
-    [Header("武器設定")]
+    [Header("業障庫設定 (怪物 Bane)")]
+    public List<MonsterData> baneDatabase;
+
+    [Header("環繞武器設定")]
     public GameObject swordHandlePrefab;
     public int currentSwordCount = 0;
     public float rotationSpeed = 180f;
     public float currentSwordScale = 1f;
 
-    [Header("終極進化設定 (萬劍朝宗 - 智慧填充版)")]
-    public bool isUltimateUnlocked = false;
-    public float attackCooldown = 0.5f;
-    public float reloadTime = 3f;
-    public int ultimateUnlockLevel = 5;
-
-    private float shootTimer = 0f;
-    private int currentAttackIndex = 0;
-    private bool[] isSwordReady;
-
     private Transform player;
     private List<GameObject> activeSwords = new List<GameObject>();
+
+    void Awake() { if (instance == null) instance = this; }
 
     void Start()
     {
         GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
         if (playerObj != null) player = playerObj.transform;
-        SpawnSwords(1);
     }
 
     void Update()
     {
         if (Time.timeScale <= 0f) return;
-
-        if (isUltimateUnlocked)
-        {
-            shootTimer += Time.deltaTime;
-            if (shootTimer >= attackCooldown && activeSwords.Count > 0)
-            {
-                TryLaunchNextSword();
-                shootTimer = 0f;
-            }
-        }
-
         foreach (GameObject sword in activeSwords)
         {
             if (sword != null) sword.transform.Rotate(0, 0, -rotationSpeed * Time.deltaTime);
         }
     }
 
-    public void ShowUpgradeMenu()
+    // ==========================================
+    // 開局流派選擇 (超級防呆版)
+    // ==========================================
+    public void ShowInitialMenu()
+    {
+        upgradePanel.SetActive(true);
+
+        // --- 選項 A ---
+        if (optionButtons.Length > 0 && optionButtons[0] != null)
+        {
+            optionButtons[0].gameObject.SetActive(true);
+            if (titleTexts.Length > 0 && titleTexts[0] != null) titleTexts[0].text = initialBuffA.upgradeName;
+
+            if (iconImages.Length > 0 && iconImages[0] != null)
+            {
+                if (initialBuffA.icon != null) { iconImages[0].sprite = initialBuffA.icon; iconImages[0].gameObject.SetActive(true); }
+                else { iconImages[0].gameObject.SetActive(false); }
+            }
+
+            if (baneIconImages != null && baneIconImages.Length > 0 && baneIconImages[0] != null)
+            {
+                if (initialBaneA != null && initialBaneA.monsterSprite != null) { baneIconImages[0].sprite = initialBaneA.monsterSprite; baneIconImages[0].gameObject.SetActive(true); }
+                else { baneIconImages[0].gameObject.SetActive(false); }
+            }
+
+            string warningA = $"\n<color=red>【初始劫數】加入：{(initialBaneA != null ? initialBaneA.monsterName : "無")}</color>";
+            if (descTexts != null && descTexts.Length > 0 && descTexts[0] != null) { descTexts[0].text = warningA; descTexts[0].gameObject.SetActive(true); }
+            else if (titleTexts.Length > 0 && titleTexts[0] != null) { titleTexts[0].text += warningA; }
+
+            optionButtons[0].onClick.RemoveAllListeners();
+            optionButtons[0].onClick.AddListener(() => ApplyInitialChoice(initialBuffA, initialBaneA));
+        }
+
+        // --- 選項 B ---
+        if (optionButtons.Length > 1 && optionButtons[1] != null)
+        {
+            optionButtons[1].gameObject.SetActive(true);
+            if (titleTexts.Length > 1 && titleTexts[1] != null) titleTexts[1].text = initialBuffB.upgradeName;
+
+            if (iconImages.Length > 1 && iconImages[1] != null)
+            {
+                if (initialBuffB.icon != null) { iconImages[1].sprite = initialBuffB.icon; iconImages[1].gameObject.SetActive(true); }
+                else { iconImages[1].gameObject.SetActive(false); }
+            }
+
+            if (baneIconImages != null && baneIconImages.Length > 1 && baneIconImages[1] != null)
+            {
+                if (initialBaneB != null && initialBaneB.monsterSprite != null) { baneIconImages[1].sprite = initialBaneB.monsterSprite; baneIconImages[1].gameObject.SetActive(true); }
+                else { baneIconImages[1].gameObject.SetActive(false); }
+            }
+
+            string warningB = $"\n<color=red>【初始劫數】加入：{(initialBaneB != null ? initialBaneB.monsterName : "無")}</color>";
+            if (descTexts != null && descTexts.Length > 1 && descTexts[1] != null) { descTexts[1].text = warningB; descTexts[1].gameObject.SetActive(true); }
+            else if (titleTexts.Length > 1 && titleTexts[1] != null) { titleTexts[1].text += warningB; }
+
+            optionButtons[1].onClick.RemoveAllListeners();
+            optionButtons[1].onClick.AddListener(() => ApplyInitialChoice(initialBuffB, initialBaneB));
+        }
+
+        // --- 隱藏其餘按鈕 ---
+        for (int i = 2; i < optionButtons.Length; i++) { if (optionButtons[i] != null) optionButtons[i].gameObject.SetActive(false); }
+    }
+
+    private void ApplyInitialChoice(UpgradeOption buff, MonsterData bane)
+    {
+        if (EnemySpawner.instance != null && bane != null)
+        {
+            EnemySpawner.instance.activeMonsterRoster.Clear();
+            EnemySpawner.instance.activeMonsterRoster.Add(bane);
+        }
+        ApplyUpgrade(buff, 1);
+    }
+
+    // ==========================================
+    // 波次抽卡與倍率系統 (包含最後一波鎖定 Boss 邏輯)
+    // ==========================================
+    public void ShowBaneMenu()
     {
         Time.timeScale = 0f;
         upgradePanel.SetActive(true);
-        RollRandomUpgrades();
+        RollBaneChoices();
     }
 
-    void RollRandomUpgrades()
+    private void RollBaneChoices()
     {
-        List<UpgradeOption> validPool = new List<UpgradeOption>();
-        PlayerHealth playerHealth = FindObjectOfType<PlayerHealth>();
+        List<MonsterData> availableBanes = new List<MonsterData>();
 
-        bool canUnlockUltimate = false;
-        foreach (var opt in upgradePool)
+        // ✨ 確認現在是不是最後一波 (第 10 波)
+        bool isFinalWave = false;
+        if (GameManager.instance != null && GameManager.instance.currentWave == GameManager.instance.maxWaves)
         {
-            if (opt.type == UpgradeType.SwordCount && opt.currentLevel >= ultimateUnlockLevel)
+            isFinalWave = true;
+        }
+
+        // ✨ 過濾怪物圖鑑池：最後一波只出 Boss，前面波次不出 Boss
+        if (baneDatabase != null)
+        {
+            foreach (var bane in baneDatabase)
             {
-                canUnlockUltimate = true;
-                break;
+                if (isFinalWave && bane.tier == MonsterData.MonsterTier.Boss)
+                {
+                    availableBanes.Add(bane); // 最後一波專屬
+                }
+                else if (!isFinalWave && bane.tier != MonsterData.MonsterTier.Boss)
+                {
+                    availableBanes.Add(bane); // 常規波次專屬
+                }
             }
         }
 
-        foreach (UpgradeOption option in upgradePool)
+        int optionsToShow = Mathf.Min(3, optionButtons.Length);
+
+        for (int i = 0; i < optionsToShow; i++)
         {
-            // 防呆 1：滿等技能不出現
-            if (option.maxLevel > 0 && option.currentLevel >= option.maxLevel) continue;
-            // 防呆 2：滿血不出現補血
-            if (option.type == UpgradeType.HealPlayer && playerHealth != null && playerHealth.currentHealth >= playerHealth.maxHealth) continue;
-            // 防呆 3：條件未滿不出大招
-            if (option.isUltimate && !canUnlockUltimate) continue;
-            // ✨ 防呆 4 (修復 Bug)：如果大招已經解鎖過了，絕對不要再放進抽卡池！
-            if (option.isUltimate && isUltimateUnlocked) continue;
+            optionButtons[i].gameObject.SetActive(true);
 
-            validPool.Add(option);
-        }
+            if (availableBanes.Count == 0) break;
 
-        int optionsToShow = Mathf.Min(3, validPool.Count);
+            int randomBaneIndex = Random.Range(0, availableBanes.Count);
+            MonsterData selectedBane = availableBanes[randomBaneIndex];
 
-        for (int i = 0; i < optionButtons.Length; i++)
-        {
-            if (i < optionsToShow)
+            // 避免三個選項都抽到同一隻怪物
+            availableBanes.RemoveAt(randomBaneIndex);
+
+            // 根據怪物階級給予倍率 (Normal = 1x, Elite = 2x, Boss = 3x)
+            int multiplier = (int)selectedBane.tier + 1;
+
+            // 過濾玩家的升級卡池
+            List<UpgradeOption> validPool = new List<UpgradeOption>();
+            foreach (UpgradeOption option in upgradePool)
             {
-                optionButtons[i].gameObject.SetActive(true);
+                if (option.maxLevel > 0 && option.currentLevel >= option.maxLevel) continue;
+                if (option.requiresRotatingSword && !hasRotatingSword) continue;
+                if (option.requiresFlyingSword && !hasFlyingSword) continue;
 
-                int randomIndex = Random.Range(0, validPool.Count);
-                UpgradeOption selectedOption = validPool[randomIndex];
+                // 已經解鎖過的流派不再重複出現解鎖選項
+                if (option.type == UpgradeType.UnlockRotatingSword && hasRotatingSword) continue;
+                if (option.type == UpgradeType.UnlockFlyingSword && hasFlyingSword) continue;
 
-                if (selectedOption.maxLevel > 0 && !selectedOption.isUltimate)
-                    titleTexts[i].text = selectedOption.upgradeName + " (Lv." + (selectedOption.currentLevel + 1) + ")";
-                else
-                    titleTexts[i].text = selectedOption.upgradeName;
+                validPool.Add(option);
+            }
 
-                descTexts[i].text = selectedOption.description;
+            UpgradeOption selectedBuff = null;
+            if (validPool.Count > 0) { selectedBuff = validPool[Random.Range(0, validPool.Count)]; }
+            else { selectedBuff = new UpgradeOption { upgradeName = "血中送炭 (生命回復)", type = UpgradeType.MaxHealthUp }; }
 
-                if (selectedOption.icon != null)
+            // UI 文字與倍率提示
+            string multiText = multiplier > 1 ? $" <color=yellow>(效果 x{multiplier})</color>" : "";
+            if (titleTexts.Length > i && titleTexts[i] != null)
+            {
+                titleTexts[i].text = selectedBuff.maxLevel > 0
+                    ? $"{selectedBuff.upgradeName} (Lv.{selectedBuff.currentLevel + 1}){multiText}"
+                    : $"{selectedBuff.upgradeName}{multiText}";
+            }
+
+            if (iconImages.Length > i && iconImages[i] != null)
+            {
+                if (selectedBuff.icon != null)
                 {
-                    iconImages[i].sprite = selectedOption.icon;
+                    iconImages[i].sprite = selectedBuff.icon;
                     iconImages[i].gameObject.SetActive(true);
                 }
-                else
-                {
-                    iconImages[i].gameObject.SetActive(false);
-                }
+                else { iconImages[i].gameObject.SetActive(false); }
+            }
 
-                optionButtons[i].onClick.RemoveAllListeners();
-                optionButtons[i].onClick.AddListener(() => ApplyUpgrade(selectedOption));
-                validPool.RemoveAt(randomIndex);
-            }
-            else
+            if (baneIconImages.Length > i && baneIconImages[i] != null)
             {
-                optionButtons[i].gameObject.SetActive(false);
+                if (selectedBane.monsterSprite != null)
+                {
+                    baneIconImages[i].sprite = selectedBane.monsterSprite;
+                    baneIconImages[i].gameObject.SetActive(true);
+                }
+                else { baneIconImages[i].gameObject.SetActive(false); }
             }
+
+            string tierName = selectedBane.tier == MonsterData.MonsterTier.Boss ? "【頭目降臨】" :
+                              selectedBane.tier == MonsterData.MonsterTier.Elite ? "【菁英入侵】" : "【普通威脅】";
+
+            if (descTexts != null && descTexts.Length > i && descTexts[i] != null)
+            {
+                descTexts[i].text = $"\n<color=red>{tierName}加入：{selectedBane.monsterName}</color>";
+                descTexts[i].gameObject.SetActive(true);
+            }
+            else if (titleTexts.Length > i && titleTexts[i] != null)
+            {
+                titleTexts[i].text += $"\n<color=red>{tierName}加入：{selectedBane.monsterName}</color>";
+            }
+
+            optionButtons[i].onClick.RemoveAllListeners();
+            optionButtons[i].onClick.AddListener(() => ApplyBaneUpgrade(selectedBuff, selectedBane, multiplier));
         }
     }
 
-    void ApplyUpgrade(UpgradeOption option)
+    private void ApplyBaneUpgrade(UpgradeOption buff, MonsterData bane, int multiplier)
     {
-        option.currentLevel++;
+        ApplyUpgrade(buff, multiplier);
+        if (EnemySpawner.instance != null) EnemySpawner.instance.activeMonsterRoster.Add(bane);
+    }
+
+    // ==========================================
+    // 升級數值實作與動態圖示
+    // ==========================================
+    void ApplyUpgrade(UpgradeOption option, int multiplier)
+    {
+        option.currentLevel += multiplier;
+
+        // 更新左上角的被動技能圖示清單
+        UpdateIconDisplay(option);
 
         switch (option.type)
         {
-            case UpgradeType.SwordCount:
-                SpawnSwords(1);
+            case UpgradeType.UnlockRotatingSword:
+                hasRotatingSword = true;
+                if (currentSwordCount == 0) SpawnSwords(1);
                 break;
-            case UpgradeType.SwordSpeed:
-                rotationSpeed += 30f;
+
+            case UpgradeType.UnlockFlyingSword:
+                hasFlyingSword = true;
+                PlayerAutoShoot autoShoot = player.GetComponent<PlayerAutoShoot>();
+                if (autoShoot != null) autoShoot.enabled = true;
                 break;
-            case UpgradeType.SwordDamage:
-                // ✨ 已經替換為萬用傷害模組，並加上 Enemy 標籤防呆
-                UniversalDamageHitbox[] hitboxes = FindObjectsOfType<UniversalDamageHitbox>();
-                foreach (UniversalDamageHitbox h in hitboxes)
-                {
-                    if (h.targetTag == "Enemy") h.damage += 3;
-                }
+
+            case UpgradeType.DamageUp:
+                extraSwordDamage += 5 * multiplier;
+                UpdateAllSwordsDamage();
                 break;
-            case UpgradeType.HealPlayer:
+
+            case UpgradeType.MaxHealthUp:
                 PlayerHealth ph = FindObjectOfType<PlayerHealth>();
-                if (ph != null) ph.Heal(20);
+                if (ph != null) { ph.maxHealth += 20 * multiplier; ph.Heal(20 * multiplier); }
                 break;
-            case UpgradeType.SwordSize:
-                currentSwordScale += 0.3f;
+
+            case UpgradeType.RotatingSwordCount:
+                if (hasRotatingSword) SpawnSwords(1 * multiplier);
+                break;
+
+            case UpgradeType.RotatingSwordSpeed:
+                rotationSpeed += 40f * multiplier;
+                break;
+
+            case UpgradeType.RotatingSwordSize:
+                currentSwordScale += 0.2f * multiplier;
                 UpdateAllSwordsSize();
                 break;
-            case UpgradeType.UltimateSword:
-                isUltimateUnlocked = true;
-                InitializeAmmoPool();
+
+            case UpgradeType.FlyingSwordFireRate:
+                PlayerAutoShoot pasRate = player.GetComponent<PlayerAutoShoot>();
+                if (pasRate != null)
+                {
+                    pasRate.fireRate -= 0.15f * multiplier;
+                    if (pasRate.fireRate < 0.1f) pasRate.fireRate = 0.1f;
+                }
+                break;
+
+            case UpgradeType.FlyingSwordCount:
+                PlayerAutoShoot pasCount = player.GetComponent<PlayerAutoShoot>();
+                if (pasCount != null) pasCount.projectileCount += 1 * multiplier;
+                break;
+
+            case UpgradeType.FlyingSwordPierce:
+                PlayerAutoShoot pasPierce = player.GetComponent<PlayerAutoShoot>();
+                if (pasPierce != null) pasPierce.pierceCount += 1 * multiplier;
+                break;
+
+            case UpgradeType.FlyingSwordBounce:
+                PlayerAutoShoot pasBounce = player.GetComponent<PlayerAutoShoot>();
+                if (pasBounce != null) pasBounce.bounceCount += 1 * multiplier;
                 break;
         }
 
@@ -201,65 +371,20 @@ public class UpgradeManager : MonoBehaviour
         ResumeGame();
     }
 
-    void TryLaunchNextSword()
+    void UpdateIconDisplay(UpgradeOption option)
     {
-        if (isSwordReady == null || isSwordReady.Length == 0) return;
+        if (iconContainer == null || iconPrefab == null || option.icon == null) return;
 
-        int startIndex = currentAttackIndex;
-        bool foundReadySword = false;
-
-        do
+        if (!activeIconUI.ContainsKey(option.type))
         {
-            if (isSwordReady[currentAttackIndex])
+            GameObject newIcon = Instantiate(iconPrefab, iconContainer);
+            Image img = newIcon.GetComponent<Image>();
+            if (img != null)
             {
-                StartCoroutine(LaunchAndReloadRoutine(currentAttackIndex));
-                isSwordReady[currentAttackIndex] = false;
-                foundReadySword = true;
-                currentAttackIndex = (currentAttackIndex + 1) % currentSwordCount;
-                break;
-            }
-            currentAttackIndex = (currentAttackIndex + 1) % currentSwordCount;
-        } while (currentAttackIndex != startIndex);
-    }
-
-    IEnumerator LaunchAndReloadRoutine(int index)
-    {
-        if (player == null || activeSwords[index] == null) yield break;
-
-        GameObject handle = activeSwords[index];
-
-        if (handle.transform.childCount > 0)
-        {
-            Transform blade = handle.transform.GetChild(0);
-            blade.gameObject.SetActive(false);
-
-            GameObject flyingVisual = Instantiate(blade.gameObject, handle.transform.position, handle.transform.rotation);
-            flyingVisual.SetActive(true);
-            flyingVisual.transform.localScale = blade.localScale;
-
-            flyingVisual.AddComponent<FlyingSword>();
-
-            if (AudioManager.instance != null) AudioManager.instance.PlayHitSound();
-
-            while (flyingVisual != null)
-            {
-                yield return null;
-            }
-
-            isSwordReady[index] = true;
-            if (blade != null)
-            {
-                blade.gameObject.SetActive(true);
+                img.sprite = option.icon;
+                activeIconUI.Add(option.type, img);
             }
         }
-    }
-
-    void InitializeAmmoPool()
-    {
-        currentSwordCount = activeSwords.Count;
-        isSwordReady = new bool[currentSwordCount];
-        for (int i = 0; i < currentSwordCount; i++) isSwordReady[i] = true;
-        currentAttackIndex = 0;
     }
 
     void UpdateAllSwordsSize()
@@ -274,17 +399,18 @@ public class UpgradeManager : MonoBehaviour
         }
     }
 
+    void UpdateAllSwordsDamage()
+    {
+        UniversalDamageHitbox[] hitboxes = FindObjectsOfType<UniversalDamageHitbox>();
+        foreach (UniversalDamageHitbox h in hitboxes) { if (h.targetTag == "Enemy") h.damage = 10 + extraSwordDamage; }
+    }
+
     private void SpawnSwords(int amountToIncrease)
     {
-        if (isUltimateUnlocked) return;
         if (player == null || swordHandlePrefab == null) return;
-
         currentSwordCount += amountToIncrease;
 
-        foreach (GameObject sword in activeSwords)
-        {
-            if (sword != null) Destroy(sword);
-        }
+        foreach (GameObject sword in activeSwords) { if (sword != null) Destroy(sword); }
         activeSwords.Clear();
 
         for (int i = 0; i < currentSwordCount; i++)
@@ -293,13 +419,10 @@ public class UpgradeManager : MonoBehaviour
             Quaternion initialRotation = Quaternion.Euler(0, 0, angle);
             GameObject newSword = Instantiate(swordHandlePrefab, player.position, initialRotation, player);
             newSword.transform.localPosition = Vector3.zero;
-
-            if (newSword.transform.childCount > 0)
-            {
-                newSword.transform.GetChild(0).localScale = new Vector3(1f, currentSwordScale, 1f);
-            }
+            if (newSword.transform.childCount > 0) { newSword.transform.GetChild(0).localScale = new Vector3(1f, currentSwordScale, 1f); }
             activeSwords.Add(newSword);
         }
+        UpdateAllSwordsDamage();
     }
 
     void ResumeGame()
@@ -309,228 +432,17 @@ public class UpgradeManager : MonoBehaviour
     }
 
     // ==========================================
-    // ✨ 動態波次系統：福禍相依抉擇 (玩家自己組合怪物)
-    // ==========================================
-
-    public void ChooseRedSpiderBane()
-    {
-        // 1. 給予玩家 Buff 
-        SpawnSwords(1); // 舉例：多給一把劍當作獎勵
-
-        // 2. 動態捏出一隻紅色突進蜘蛛的食譜
-        MonsterData newMonster = ScriptableObject.CreateInstance<MonsterData>();
-        newMonster.monsterName = "業障·血紅突進者";
-        newMonster.monsterColor = Color.red;
-        newMonster.scaleMultiplier = 1.5f;
-        newMonster.maxHealth = 100;
-        newMonster.moveSpeed = 3f;
-        newMonster.useMeleeAttack = true;
-        newMonster.brainType = MonsterData.AIType.SpiderCharge;
-
-        // 3. 塞入 Spawner 的卡池中
-        if (EnemySpawner.instance != null)
-        {
-            EnemySpawner.instance.activeMonsterRoster.Add(newMonster);
-        }
-
-        ResumeGame();
-    }
-
-    public void ChooseGreenGiantBane()
-    {
-        rotationSpeed += 30f; // 舉例：轉速變快當作獎勵
-
-        MonsterData newMonster = ScriptableObject.CreateInstance<MonsterData>();
-        newMonster.monsterName = "業障·綠色巨型怪";
-        newMonster.monsterColor = Color.green;
-        newMonster.scaleMultiplier = 2.5f;
-        newMonster.maxHealth = 300;
-        newMonster.moveSpeed = 1f;
-        newMonster.useMeleeAttack = true;
-        newMonster.brainType = MonsterData.AIType.StraightChaser;
-
-        if (EnemySpawner.instance != null)
-        {
-            EnemySpawner.instance.activeMonsterRoster.Add(newMonster);
-        }
-
-        ResumeGame();
-    }
-    // ==========================================
-    // ✨ 路線二：局內全自動微升級 (經驗條滿時呼叫)
+    // 局內全自動微升級
     // ==========================================
     public void ApplyMicroUpgrade()
     {
-        // 1. 三圍微幅提升 (你可以依據平衡性自己微調數字)
+        extraSwordDamage += 1;
+        UpdateAllSwordsDamage();
+        rotationSpeed += 5f;
 
-        // 【三圍 1：傷害微升】
-        UniversalDamageHitbox[] hitboxes = FindObjectsOfType<UniversalDamageHitbox>();
-        foreach (UniversalDamageHitbox h in hitboxes)
-        {
-            // 非常重要：確保只加成標籤為 "Enemy" 的觸發器 (也就是玩家的飛劍)
-            // 不然你連怪物跟蝙蝠的攻擊力都會一起升級，玩家會哭出來 XD
-            if (h.targetTag == "Enemy")
-            {
-                h.damage += 1;
-            }
-        }
-
-        // 【三圍 2：轉速微升】
-        rotationSpeed += 5f; // 每次升級加 5 轉速
-
-        // 【三圍 3：血量微升與回復】
         PlayerHealth ph = FindObjectOfType<PlayerHealth>();
-        if (ph != null)
-        {
-            ph.maxHealth += 5;   // 上限加 5
-            ph.Heal(5);          // 順便補 5 滴血，提高生存率
-        }
+        if (ph != null) { ph.maxHealth += 5; ph.Heal(5); }
 
-        // 2. 播放升級音效 (保留原本的爽感)
         if (AudioManager.instance != null) AudioManager.instance.PlayLevelUp();
-
-        // 3. 可以在這裡加一個玩家頭上飄出 "Level Up!" 的小特效或文字 (選配)
-        Debug.Log("自動微升級完成：傷害+1、轉速+5、血量+5！");
-    }
-    // ==========================================
-    // ✨ 路線二：波次大抉擇 (三選一福禍相依)
-    // ==========================================
-
-    /// <summary>
-    /// 隨機捏造一隻變異怪物的「食譜」
-    /// </summary>
-    private MonsterData GenerateRandomBane()
-    {
-        MonsterData newMonster = ScriptableObject.CreateInstance<MonsterData>();
-
-        // 1. 隨機決定 AI 類型 (0 = 直線追擊, 1 = 蜘蛛突進)
-        int aiRoll = Random.Range(0, 2);
-
-        // 2. 隨機決定顏色與前綴詞
-        string[] prefixes = { "血紅", "劇毒", "虛空", "狂暴", "鋼鐵" };
-        Color[] colors = { Color.red, Color.green, new Color(0.5f, 0, 0.5f), new Color(1f, 0.5f, 0f), Color.gray };
-        int colorRoll = Random.Range(0, prefixes.Length);
-
-        // 3. 組合屬性
-        newMonster.monsterColor = colors[colorRoll];
-        newMonster.useMeleeAttack = true;
-
-        if (aiRoll == 0)
-        {
-            // 巨型肉盾型
-            newMonster.monsterName = $"業障·{prefixes[colorRoll]}巨獸";
-            newMonster.scaleMultiplier = Random.Range(1.5f, 2.5f);
-            newMonster.maxHealth = 150;
-            newMonster.moveSpeed = Random.Range(1f, 1.8f); // 走得慢
-            newMonster.brainType = MonsterData.AIType.StraightChaser;
-        }
-        else
-        {
-            // 高速刺客型
-            newMonster.monsterName = $"業障·{prefixes[colorRoll]}突進者";
-            newMonster.scaleMultiplier = Random.Range(0.8f, 1.2f); // 體型較小
-            newMonster.maxHealth = 80;
-            newMonster.moveSpeed = Random.Range(2.5f, 3.5f); // 跑得快
-            newMonster.brainType = MonsterData.AIType.SpiderCharge;
-        }
-
-        return newMonster;
-    }
-    /// <summary>
-    /// 呼叫這個方法來開啟「波次結束」的三選一面板
-    /// </summary>
-    public void ShowBaneMenu()
-    {
-        Time.timeScale = 0f;
-        upgradePanel.SetActive(true); // 沿用你原本的面板！
-        RollBaneChoices();
-    }
-
-    private void RollBaneChoices()
-    {
-        List<UpgradeOption> validPool = new List<UpgradeOption>();
-        PlayerHealth playerHealth = FindObjectOfType<PlayerHealth>();
-        bool canUnlockUltimate = false;
-
-        // 檢查大招條件
-        foreach (var opt in upgradePool)
-        {
-            if (opt.type == UpgradeType.SwordCount && opt.currentLevel >= ultimateUnlockLevel)
-            {
-                canUnlockUltimate = true;
-                break;
-            }
-        }
-
-        // 過濾可用選項 (防呆邏輯)
-        foreach (UpgradeOption option in upgradePool)
-        {
-            if (option.maxLevel > 0 && option.currentLevel >= option.maxLevel) continue;
-            if (option.type == UpgradeType.HealPlayer && playerHealth != null && playerHealth.currentHealth >= playerHealth.maxHealth) continue;
-            if (option.isUltimate && !canUnlockUltimate) continue;
-            if (option.isUltimate && isUltimateUnlocked) continue;
-            validPool.Add(option);
-        }
-
-        int optionsToShow = Mathf.Min(3, validPool.Count);
-
-        for (int i = 0; i < optionButtons.Length; i++)
-        {
-            if (i < optionsToShow)
-            {
-                optionButtons[i].gameObject.SetActive(true);
-
-                // 隨機抽一個 Buff
-                int randomIndex = Random.Range(0, validPool.Count);
-                UpgradeOption selectedBuff = validPool[randomIndex];
-
-                // ✨ 隨機生成一個 Bane (變異怪物)
-                MonsterData generatedBane = GenerateRandomBane();
-
-                // 設定標題與 Icon
-                titleTexts[i].text = selectedBuff.maxLevel > 0 && !selectedBuff.isUltimate
-                    ? $"{selectedBuff.upgradeName} (Lv.{selectedBuff.currentLevel + 1})"
-                    : selectedBuff.upgradeName;
-
-                if (selectedBuff.icon != null)
-                {
-                    iconImages[i].sprite = selectedBuff.icon;
-                    iconImages[i].gameObject.SetActive(true);
-                }
-                else
-                {
-                    iconImages[i].gameObject.SetActive(false);
-                }
-
-                // ✨ 將 Buff 說明與 Bane 說明組合在一起顯示！
-                descTexts[i].text = $"{selectedBuff.description}\n\n<color=red>【劫數代價】\n下一波加入：{generatedBane.monsterName}</color>";
-
-                // 清除舊事件，綁定新的「同時給予 Buff 與 Bane」的事件
-                optionButtons[i].onClick.RemoveAllListeners();
-                optionButtons[i].onClick.AddListener(() => ApplyBaneUpgrade(selectedBuff, generatedBane));
-
-                validPool.RemoveAt(randomIndex);
-            }
-            else
-            {
-                optionButtons[i].gameObject.SetActive(false);
-            }
-        }
-    }
-
-    /// <summary>
-    /// 玩家點擊選項後執行：給獎勵 -> 塞怪物 -> 關面板
-    /// </summary>
-    private void ApplyBaneUpgrade(UpgradeOption buff, MonsterData bane)
-    {
-        // 1. 給予原本的升級獎勵
-        ApplyUpgrade(buff); // 這會呼叫你原本寫好的 switch 判斷並關閉面板
-
-        // 2. 將隨機生成的怪物塞進卡池
-        if (EnemySpawner.instance != null)
-        {
-            EnemySpawner.instance.activeMonsterRoster.Add(bane);
-            Debug.Log($"福禍相依觸發！獲得 {buff.upgradeName}，卡池加入 {bane.monsterName}！");
-        }
     }
 }

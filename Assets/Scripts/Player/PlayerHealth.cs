@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using UnityEngine.UI; // ✨ 必須使用此命名空間
+using TMPro; // ✨ 記得引入
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -14,7 +15,9 @@ public class PlayerHealth : MonoBehaviour
     private DamageFlash damageFlash;
 
     [Header("UI 設定 (一般血條)")]
-    public Slider healthSlider; // ✨ 直接拖入 UI 上的 Slider 元件
+    // ✨ 這裡將 Slider 改成了 Image，跟經驗條保持完全一樣的模式
+    public Image healthBarFill;
+    public TextMeshProUGUI healthText; // 用來顯示具體數字的文字框
 
     public GameObject tombstonePrefab;
 
@@ -23,12 +26,8 @@ public class PlayerHealth : MonoBehaviour
         currentHealth = maxHealth;
         damageFlash = GetComponent<DamageFlash>();
 
-        // 初始化血條數值
-        if (healthSlider != null)
-        {
-            healthSlider.maxValue = maxHealth;
-            healthSlider.value = currentHealth;
-        }
+        // ✨ 遊戲一開始就強制刷新文字與 UI
+        UpdateHealthUI();
     }
 
     void Update()
@@ -41,22 +40,31 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
+        // 核心修正：如果還在無敵時間，就直接跳出，不吃傷害
+        if (invincibilityTimer > 0) return;
+
         currentHealth -= damage;
-        invincibilityTimer = invincibilityDuration;
+        invincibilityTimer = invincibilityDuration; // 重新進入無敵狀態
 
         if (damageFlash != null) damageFlash.CallFlash();
-
-        UpdateHealthUI(); // ✨ 更新長條血條
+        UpdateHealthUI();
 
         if (currentHealth <= 0) Die();
     }
 
-    // ✨ 現在更新 UI 變超級簡單，直接把數字給 Slider 就好！
+    // ✨ 現在更新 UI 變超級簡單，計算比例給 fillAmount 就好！
     void UpdateHealthUI()
     {
-        if (healthSlider != null)
+        if (healthBarFill != null)
         {
-            healthSlider.value = currentHealth;
+            // 將當前血量除以最大血量，算出 0.0 ~ 1.0 的小數比例
+            healthBarFill.fillAmount = (float)currentHealth / maxHealth;
+        }
+
+        // 更新文字，例如 "HP: 80 / 100"
+        if (healthText != null)
+        {
+            healthText.text = $"HP: {currentHealth} / {maxHealth}";
         }
     }
 
@@ -70,7 +78,8 @@ public class PlayerHealth : MonoBehaviour
     {
         if (tombstonePrefab != null) Instantiate(tombstonePrefab, transform.position, Quaternion.identity);
         gameObject.SetActive(false);
-        // ✨ 修改這裡：直接呼叫單例
+
+        // 直接呼叫單例
         if (GameManager.instance != null) GameManager.instance.GameOver();
     }
 }

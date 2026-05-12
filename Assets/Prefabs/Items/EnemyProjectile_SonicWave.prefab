@@ -86,7 +86,7 @@ SpriteRenderer:
   m_SortingOrder: 10
   m_MaskInteraction: 0
   m_Sprite: {fileID: -8287917976682621784, guid: eecd16947fb581d4c889bc2d216eb50a, type: 3}
-  m_Color: {r: 1, g: 1, b: 1, a: 1}
+  m_Color: {r: 0.9056604, g: 0.12388753, b: 0.12388753, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -171,7 +171,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyProjectile
   speed: 5
-  damage: 20
   lifeTime: 5
 --- !u!114 &1625429947417247599
 MonoBehaviour:
@@ -186,5 +185,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::UniversalDamageHitbox
   damage: 10
+  damageTextPrefab: {fileID: 0}
   targetTag: Player
   destroyOnHit: 1

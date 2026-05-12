@@ -31,9 +31,15 @@ public class GameManager : MonoBehaviour
         // 遊戲開始時，初始化第一波的時間
         waveTimer = waveDuration;
 
-        // 如果有開始畫面，請根據你的設計決定要不要先暫停。這裡預設遊戲直接開始。
-        Time.timeScale = 1f;
+        // ✨ 修改這裡：遊戲開局直接凍結時間，並呼叫 UpgradeManager 彈出二選一
+        Time.timeScale = 0f;
         UpdateTimerUI();
+
+        UpgradeManager um = FindObjectOfType<UpgradeManager>();
+        if (um != null)
+        {
+            um.ShowInitialMenu(); // 呼叫我們即將寫好的開局專用選單
+        }
     }
 
     void Update()
@@ -54,7 +60,10 @@ public class GameManager : MonoBehaviour
                 currentWave++;
                 waveTimer = waveDuration;
 
-                // 2. ✨ 核心機制：呼叫 UpgradeManager 彈出「渡劫抉擇面板」！
+                // 2. ✨ 核心機制：全圖清場與吸取寶石！
+                ClearBoardAndSuckGems();
+
+                // 3. 呼叫 UpgradeManager 彈出「渡劫抉擇面板」！
                 UpgradeManager um = FindObjectOfType<UpgradeManager>();
                 if (um != null)
                 {
@@ -83,6 +92,36 @@ public class GameManager : MonoBehaviour
 
             // 顯示格式例如：「第 1 / 10 波 | 剩餘：45 秒」
             timerText.text = $"第 {currentWave} / {maxWaves} 波 | 剩餘：{secondsLeft} 秒";
+        }
+    }
+
+    // ✨ 創造波次感的核心：波次結算清場
+    private void ClearBoardAndSuckGems()
+    {
+        // 1. 瞬間抹殺場上所有怪物 (直接 Destroy，不呼叫 Die 以免噴一堆特效跟寶石)
+        EnemyHealth[] allEnemies = FindObjectsOfType<EnemyHealth>();
+        foreach (EnemyHealth enemy in allEnemies)
+        {
+            Destroy(enemy.gameObject);
+        }
+
+        // 1.5. 順便把場上還在飛的敵方子彈也清掉，保證絕對安全
+        EnemyProjectile[] allBullets = FindObjectsOfType<EnemyProjectile>();
+        foreach (EnemyProjectile bullet in allBullets)
+        {
+            Destroy(bullet.gameObject);
+        }
+
+        // 2. 全圖寶石大磁鐵！把地上的寶石全部吸給主角
+        Gem[] allGems = FindObjectsOfType<Gem>();
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            foreach (Gem gem in allGems)
+            {
+                // 呼叫寶石的 StartFlying 方法，朝主角飛去
+                gem.StartFlying(playerObj.transform);
+            }
         }
     }
 

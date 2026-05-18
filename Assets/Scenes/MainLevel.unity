@@ -38707,7 +38707,7 @@ MonoBehaviour:
     requiresFlyingSword: 0
     maxLevel: 1
     currentLevel: 0
-  initialBaneA: {fileID: 11400000, guid: ba4307e7291df37488b337ccc4becd09, type: 2}
+  initialBaneA: {fileID: 11400000, guid: b71daed8f2b568d4cb69a4860fcd6c09, type: 2}
   initialBuffB:
     upgradeName: "\u5FA1\u528D\u8853"
     icon: {fileID: 21300000, guid: 139896ae9c7105140bf96a66f05e1c40, type: 3}
@@ -38716,7 +38716,7 @@ MonoBehaviour:
     requiresFlyingSword: 0
     maxLevel: 1
     currentLevel: 0
-  initialBaneB: {fileID: 11400000, guid: b71daed8f2b568d4cb69a4860fcd6c09, type: 2}
+  initialBaneB: {fileID: 11400000, guid: ba4307e7291df37488b337ccc4becd09, type: 2}
   upgradePool:
   - upgradeName: "\u589E\u52A0\u74B0\u7E5E\u528D"
     icon: {fileID: 21300000, guid: c68838cd724d5cc4a89b38f46c68a7d1, type: 3}

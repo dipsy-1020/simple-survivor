@@ -44,11 +44,13 @@ public class EnemyHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        // ✨ 核心修復：如果還在無敵時間內，直接跳出，拒絕雙判！
-        if (invincibilityTimer > 0) return;
+        // ==========================================
+        // ✨ 解除無敵限制！把它註解掉，拒絕吃傷害！
+        // ==========================================
+        // if (invincibilityTimer > 0) return;  <-- 把這行前面加上 // 註解掉
 
         currentHealth -= damage;
-        invincibilityTimer = invincibilityDuration; // 刷新無敵時間
+        // invincibilityTimer = invincibilityDuration; <-- 這行也可以註解掉了
 
         if (damageFlash != null) damageFlash.CallFlash();
 
@@ -81,11 +83,6 @@ public class EnemyHealth : MonoBehaviour
         }
 
         Destroy(gameObject);
-
-        if (isBoss)
-        {
-            if (GameManager.instance != null) GameManager.instance.Victory();
-        }
     }
 
     // ✨ 新增這兩個方法在腳本最底下

@@ -87,7 +87,6 @@ public class UpgradeManager : MonoBehaviour
     private bool isFeverActive = false; // 只用一個布林值當作鎖
     private float normalRotationSpeed;
     private float normalFireRate;
-    private int normalProjectileCount;
 
     private Transform player;
     private List<GameObject> activeSwords = new List<GameObject>();
@@ -517,7 +516,7 @@ public class UpgradeManager : MonoBehaviour
 
     private IEnumerator FeverRoutine()
     {
-        isFeverActive = true; // 上鎖，接下來 3 秒內的升級都不會再觸發核爆
+        isFeverActive = true; // 上鎖，避免連續觸發
 
         // 1. 紀錄發動前的正常數值
         normalRotationSpeed = rotationSpeed;
@@ -525,18 +524,18 @@ public class UpgradeManager : MonoBehaviour
         if (autoShoot != null)
         {
             normalFireRate = autoShoot.fireRate;
-            normalProjectileCount = autoShoot.projectileCount;
+            // ✨ 已經刪除：紀錄子彈數量的邏輯
         }
 
-        // 3. 🔥 切換為狂熱數值
+        // 3. 🔥 切換為狂熱數值 (只保留極致轉速與極致射速！)
         rotationSpeed = 1000f;
         if (autoShoot != null)
         {
             autoShoot.fireRate = 0.1f;
-            autoShoot.projectileCount = normalProjectileCount + 3;
+            // ✨ 已經刪除：增加子彈數量的邏輯
         }
 
-        // 4. ⏳ 維持 3 秒
+        // 4. ⏳ 維持時間 (依照你原本的設定是 2 秒)
         yield return new WaitForSeconds(2f);
 
         // 5. 🛑 狂熱結束，數值回歸正常
@@ -544,7 +543,7 @@ public class UpgradeManager : MonoBehaviour
         if (autoShoot != null)
         {
             autoShoot.fireRate = normalFireRate;
-            autoShoot.projectileCount = normalProjectileCount;
+            // ✨ 已經刪除：恢復子彈數量的邏輯
         }
 
         isFeverActive = false; // 解鎖

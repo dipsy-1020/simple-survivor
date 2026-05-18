@@ -15,10 +15,10 @@ MonoBehaviour:
   monsterName: "\u8783\u87F9"
   monsterSprite: {fileID: -5829726057563536327, guid: 03e1494567fe53f44ab5cd9bc409b1ae, type: 3}
   monsterColor: {r: 1, g: 1, b: 1, a: 1}
-  scaleMultiplier: 0.9
+  scaleMultiplier: 0.8
   tier: 0
-  maxHealth: 25
-  moveSpeed: 4.5
+  maxHealth: 55
+  moveSpeed: 3.5
   useMeleeAttack: 1
   useRangeAttack: 0
   projectilePrefab: {fileID: 0}

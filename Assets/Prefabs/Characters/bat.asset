@@ -18,7 +18,7 @@ MonoBehaviour:
   scaleMultiplier: 1
   tier: 0
   maxHealth: 40
-  moveSpeed: 7
+  moveSpeed: 4.8
   useMeleeAttack: 0
   useRangeAttack: 1
   projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}

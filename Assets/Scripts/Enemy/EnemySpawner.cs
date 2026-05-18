@@ -5,10 +5,15 @@ public class EnemySpawner : MonoBehaviour
 {
     public static EnemySpawner instance;
 
+    [Header("✨ 地圖邊界限制 (防止怪生在牆外)")]
+    public bool clampToMap = true;
+    public Vector2 minMapBounds = new Vector2(-20f, -20f); // 根據你實際的地圖大小填寫
+    public Vector2 maxMapBounds = new Vector2(20f, 20f);
+
     [Header("✨ 同屏數量上限")]
-    public int maxNormal = 150;  // 滿畫面普通怪
-    public int maxElite = 15;    // 最多同時 15 隻菁英怪
-    public int maxBoss = 2;      // 理論上一次只會有一隻，設 2 防呆
+    public int maxNormal = 80;  // ✨ 下調數量
+    public int maxElite = 10;
+    public int maxBoss = 5;
 
     [HideInInspector] public int currentNormal = 0;
     [HideInInspector] public int currentElite = 0;
@@ -17,14 +22,16 @@ public class EnemySpawner : MonoBehaviour
     [Header("生成設定")]
     public GameObject baseMonsterPrefab;
     public float spawnInterval = 2f;
+    public float spawnRadius = 15f; // ✨ 離玩家多遠生成 (設在畫面外邊緣)
     private float spawnTimer;
-    public Transform[] spawnPoints;
 
     [Header("當前怪物陣容 (卡池)")]
     public List<MonsterData> activeMonsterRoster = new List<MonsterData>();
     public MonsterData initialMonster;
 
     private GameObject activeBoss;
+
+    private List<MonsterData> bossesToSpawn = new List<MonsterData>();
 
     // ==========================================
     // ✨ 補上遺漏的變數：用來記錄要強制降臨的 Boss
@@ -44,20 +51,31 @@ public class EnemySpawner : MonoBehaviour
 
     void Update()
     {
-        if (baseMonsterPrefab == null || activeMonsterRoster.Count == 0) return;
+        if (baseMonsterPrefab == null) return;
 
-        // ✨ 處理 Boss 強制降臨
-        if (finalBossToSpawn != null && !finalBossHasSpawned)
+        // ✨ 處理 Boss 降臨 (不再限制只能有一隻)
+        if (bossesToSpawn.Count > 0)
         {
-            SpawnSpecificEnemy(finalBossToSpawn);
-            finalBossHasSpawned = true;
+            foreach (var boss in bossesToSpawn) SpawnSpecificEnemy(boss);
+            bossesToSpawn.Clear();
         }
 
+        if (activeMonsterRoster.Count == 0) return;
+
+        // ==========================================
+        // ✨ 補回遺失的程式碼：波次難度縮減與計時器
+        // ==========================================
         float currentSpawnInterval = spawnInterval;
         if (GameManager.instance != null)
         {
             int currentWave = GameManager.instance.currentWave;
-            currentSpawnInterval = Mathf.Max(0.03f, spawnInterval - ((currentWave - 1) * 0.25f));
+            int maxWaves = GameManager.instance.maxWaves; // 總波次 (10波)
+
+            // ✨ 完美線性流暢加速公式：
+            // 每升一波，就穩定減少「固定比例」的生怪間隔，直到最後一波達到最極限
+            // 假設 spawnInterval 是 2f，到了第 10 波會被壓到 0.2f 左右（數值你可以根據體感微調）
+            float reductionPerWave = 0.15f;
+            currentSpawnInterval = Mathf.Max(0.05f, spawnInterval - ((currentWave - 1) * reductionPerWave));
         }
 
         spawnTimer += Time.deltaTime;
@@ -76,20 +94,35 @@ public class EnemySpawner : MonoBehaviour
         }
     }
 
-    // ==========================================
-    // ✨ 補上遺漏的方法：讓 UpgradeManager 可以呼叫
-    // ==========================================
-    public void RegisterFinalBoss(MonsterData bossData)
+    public void RegisterBoss(MonsterData bossData)
     {
-        finalBossToSpawn = bossData;
-        finalBossHasSpawned = false;
+        bossesToSpawn.Add(bossData);
     }
 
     void SpawnSpecificEnemy(MonsterData chosenData)
     {
-        Transform sp = spawnPoints[Random.Range(0, spawnPoints.Length)];
-        GameObject newEnemy = Instantiate(baseMonsterPrefab, sp.position, Quaternion.identity);
+        // 1. 動態生成位置
+        Vector3 spawnPos = Vector3.zero;
+        GameObject playerObj = GameObject.FindGameObjectWithTag("Player");
+        if (playerObj != null)
+        {
+            Vector2 randomDir = Random.insideUnitCircle.normalized;
+            spawnPos = playerObj.transform.position + new Vector3(randomDir.x, randomDir.y, 0f) * spawnRadius;
 
+            // ✨ 新增：如果開啟邊界限制，強制把生成點卡在牆內！
+            if (clampToMap)
+            {
+                spawnPos.x = Mathf.Clamp(spawnPos.x, minMapBounds.x, maxMapBounds.x);
+                spawnPos.y = Mathf.Clamp(spawnPos.y, minMapBounds.y, maxMapBounds.y);
+            }
+        }
+
+        // 2. 生成怪物實體
+        GameObject newEnemy = Instantiate(baseMonsterPrefab, spawnPos, Quaternion.identity);
+
+        // ==========================================
+        // ✨ 以下是被你不小心刪掉的外觀與 AI 綁定代碼，我全補回來了！
+        // ==========================================
         SpriteRenderer sr = newEnemy.GetComponent<SpriteRenderer>();
         if (sr != null && chosenData.monsterSprite != null)
         {
@@ -98,18 +131,12 @@ public class EnemySpawner : MonoBehaviour
         }
         newEnemy.transform.localScale = Vector3.one * chosenData.scaleMultiplier;
 
-        // ==========================================
-        // ✨ 陡峭難度膨脹 (高壓版)
-        // ==========================================
         float healthMultiplier = 1f;
         float speedMultiplier = 1f;
 
         if (GameManager.instance != null)
         {
             int currentWave = GameManager.instance.currentWave;
-
-            // 血量：每波增加 40% (到了第 10 波，怪物血量會是原本的 4.6 倍！)
-            // 速度：每波增加 5% (讓怪物後期像瘋狗一樣黏上來)
             healthMultiplier = 1f + ((currentWave - 1) * 0.40f);
             speedMultiplier = 1f + ((currentWave - 1) * 0.05f);
         }
@@ -117,7 +144,6 @@ public class EnemySpawner : MonoBehaviour
         EnemyHealth health = newEnemy.GetComponent<EnemyHealth>();
         if (health != null)
         {
-            // ✨ 記錄階級，並增加人口計數器
             health.myTier = chosenData.tier;
             if (chosenData.tier == MonsterData.MonsterTier.Normal) currentNormal++;
             else if (chosenData.tier == MonsterData.MonsterTier.Elite) currentElite++;
@@ -145,7 +171,6 @@ public class EnemySpawner : MonoBehaviour
             case MonsterData.AIType.SpiderCharge:
                 SpiderAI spider = newEnemy.AddComponent<SpiderAI>();
                 spider.normalSpeed = finalMoveSpeed;
-                // ✨ 把食譜裡的衝刺參數灌給大腦！
                 spider.chargeDistance = chosenData.chargeDistance;
                 spider.prepTime = chosenData.chargePrepTime;
                 spider.cooldown = chosenData.chargeCooldown;
@@ -154,7 +179,6 @@ public class EnemySpawner : MonoBehaviour
             case MonsterData.AIType.BatKite:
                 BatAI bat = newEnemy.AddComponent<BatAI>();
                 bat.moveSpeed = finalMoveSpeed;
-                // ✨ 把食譜裡的遠程參數灌給大腦！
                 bat.stoppingDistance = chosenData.stoppingDistance;
                 bat.fireRate = chosenData.fireRate;
                 bat.attackDamage = chosenData.rangedAttackDamage;
@@ -168,10 +192,9 @@ public class EnemySpawner : MonoBehaviour
 
                 if (chosenData.tier == MonsterData.MonsterTier.Boss)
                 {
-                    Destroy(bat); // 移除蝙蝠大腦，換上 Boss 大腦
+                    Destroy(bat);
                     BossAI bossBrain = newEnemy.AddComponent<BossAI>();
                     bossBrain.moveSpeed = finalMoveSpeed;
-                    // ✨ 把食譜裡的 Boss 專屬參數灌給大腦！
                     bossBrain.attackInterval = chosenData.bossAttackInterval;
                     bossBrain.bulletDamage = chosenData.bossBulletDamage;
                 }

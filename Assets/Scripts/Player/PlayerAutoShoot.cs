@@ -5,7 +5,6 @@ public class PlayerAutoShoot : MonoBehaviour
 {
     [Header("射擊設定")]
     public float fireRate = 1.5f;
-    public int baseSwordDamage = 15;
     public int projectileCount = 1;
     public float spreadAngle = 15f;
     public int pierceCount = 0;
@@ -43,8 +42,15 @@ public class PlayerAutoShoot : MonoBehaviour
         if (nearestEnemy != null)
         {
             Vector2 baseDirection = (nearestEnemy.transform.position - transform.position).normalized;
-            int totalDamage = baseSwordDamage;
-            if (UpgradeManager.instance != null) totalDamage += UpgradeManager.instance.extraSwordDamage;
+
+            // ==========================================
+            // ✨ 核心修正：統一向 UpgradeManager 請求最終傷害
+            // ==========================================
+            int totalDamage = 15; // 防呆預設值
+            if (UpgradeManager.instance != null)
+            {
+                totalDamage = UpgradeManager.instance.baseSwordDamage + UpgradeManager.instance.extraSwordDamage;
+            }
 
             float startAngle = -spreadAngle * (projectileCount - 1) / 2f;
             for (int i = 0; i < projectileCount; i++)

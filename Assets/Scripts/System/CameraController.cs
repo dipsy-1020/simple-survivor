@@ -1,30 +1,35 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class CameraController : MonoBehaviour
 {
-    [Header("¸òÀH¥Ø¼Ğ")]
-    public Transform target; // §â§AªºÃM¤h©Ô¨ì³o¸Ì
+    [Header("è·Ÿéš¨ç›®æ¨™")]
+    public Transform target;
+    public float smoothSpeed = 5f;
+    public Vector3 offset = new Vector3(0f, 0f, -10f);
 
-    [Header("¥­·Æµ{«×")]
-    public float smoothSpeed = 5f; // ¼Æ­È¶V¤p¡A¸òÀH¶V¦³¡u©µ¿ğªº·Æ¶¶·P¡v
+    [Header("âœ¨ é‚Šç•Œé™åˆ¶ï¼ˆä»¥åˆ†é¡çˆ¶ç‰©ä»¶ç‚º (0,0) çš„åœ°åœ–ç¯„åœï¼‰")]
+    public bool useBounds = true;
+    public Vector2 minBounds = new Vector2(-20f, -15f); // ğŸ¯ é€™è£¡ç›´æ¥å¡« 20 å·¦å³çš„æ•¸å€¼ï¼
+    public Vector2 maxBounds = new Vector2(20f, 15f);
 
-    [Header("¦ì¸m°¾²¾")]
-    public Vector3 offset = new Vector3(0f, 0f, -10f); // Z¶b¤@©w­n¬O­tªº¡AÄá¼v¾÷¤~¬İ±o¨ì2Dµe­±
-
-    // Äá¼v¾÷ªº²¾°Ê«ØÄ³©ñ¦b LateUpdate ¸Ì­±
-    // ³o¼Ë¥i¥H½T«O¥D¨¤¦b Update ²¾°Ê§¹¤§«á¡AÄá¼v¾÷¤~¸ò¤W¥h¡Aµe­±¤~¤£·|§İ°Ê
     void LateUpdate()
     {
-        if (target != null)
+        if (target == null) return;
+
+        // 1. æŠ“å–ç›®æ¨™ç›¸å°æ–¼çˆ¶ç‰©ä»¶çš„ã€Œå±€éƒ¨åº§æ¨™ã€
+        Vector3 desiredLocalPosition = target.localPosition + offset;
+
+        // 2. åœ¨å±€éƒ¨ç©ºé–“è£¡é€²è¡Œå¹³æ»‘æ’å€¼é‹ç®—
+        Vector3 smoothedLocalPosition = Vector3.Lerp(transform.localPosition, desiredLocalPosition, smoothSpeed * Time.deltaTime);
+
+        // 3. å±€éƒ¨æµ·é—œæª¢æŸ¥ï¼šé€™æ™‚å€™é™åˆ¶çš„æ‰æ˜¯ä½ å¡«çš„ (-20, 20) ç‰†å£ï¼
+        if (useBounds)
         {
-            // ­pºâÄá¼v¾÷À³¸Ó­n¥hªº¦ì¸m¡]¥D¨¤¦ì¸m + °¾²¾¶q¡^
-            Vector3 desiredPosition = target.position + offset;
-
-            // ¨Ï¥Î Lerp (½u©Ê´¡­È) ÅıÄá¼v¾÷¥­·Æ¦a´Â¥Ø¼Ğ¦ì¸m²¾°Ê
-            Vector3 smoothedPosition = Vector3.Lerp(transform.position, desiredPosition, smoothSpeed * Time.deltaTime);
-
-            // §ó·sÄá¼v¾÷¦ì¸m
-            transform.position = smoothedPosition;
+            smoothedLocalPosition.x = Mathf.Clamp(smoothedLocalPosition.x, minBounds.x, maxBounds.x);
+            smoothedLocalPosition.y = Mathf.Clamp(smoothedLocalPosition.y, minBounds.y, maxBounds.y);
         }
+
+        // 4. æ­£ç¢ºæŒ‡æ´¾çµ¦ localPositionï¼Œè®“æ”å½±æ©Ÿä¹–ä¹–å¾…åœ¨åˆ†é¡çˆ¶ç‰©ä»¶è‚šå­è£¡
+        transform.localPosition = smoothedLocalPosition;
     }
 }

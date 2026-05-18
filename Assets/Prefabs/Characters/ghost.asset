@@ -18,11 +18,11 @@ MonoBehaviour:
   scaleMultiplier: 1.1
   tier: 1
   maxHealth: 90
-  moveSpeed: 5.5
+  moveSpeed: 5
   useMeleeAttack: 0
   useRangeAttack: 1
   projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}
-  brainType: 0
+  brainType: 2
   chargeDistance: 6
   chargePrepTime: 0.5
   chargeCooldown: 3

@@ -9,7 +9,7 @@ public class PlayerHealth : MonoBehaviour
     public int currentHealth;
 
     [Header("受傷無敵時間")]
-    public float invincibilityDuration = 1f;
+    public float invincibilityDuration = 0.2f; // ✨ 縮短到 0.2 秒！1 秒真的太久了
     private float invincibilityTimer;
 
     private DamageFlash damageFlash;
@@ -40,11 +40,18 @@ public class PlayerHealth : MonoBehaviour
 
     public void TakeDamage(int damage)
     {
-        // 核心修正：如果還在無敵時間，就直接跳出，不吃傷害
         if (invincibilityTimer > 0) return;
 
-        currentHealth -= damage;
-        invincibilityTimer = invincibilityDuration; // 重新進入無敵狀態
+        // ✨ 動態難度：每增加 1 波，怪物傷害提升 30%！
+        int actualDamage = damage;
+        if (GameManager.instance != null)
+        {
+            float multiplier = 1f + ((GameManager.instance.currentWave - 1) * 0.3f);
+            actualDamage = Mathf.RoundToInt(damage * multiplier);
+        }
+
+        currentHealth -= actualDamage;
+        invincibilityTimer = invincibilityDuration;
 
         if (damageFlash != null) damageFlash.CallFlash();
         UpdateHealthUI();

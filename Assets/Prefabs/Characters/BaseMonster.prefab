@@ -108,10 +108,10 @@ Rigidbody2D:
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
   m_Mass: 1
-  m_LinearDamping: 0
+  m_LinearDamping: 8
   m_AngularDamping: 0.05
   m_GravityScale: 0
-  m_Material: {fileID: 0}
+  m_Material: {fileID: 6200000, guid: 389f66711b9de2b428dd0f846e16797c, type: 2}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -181,6 +181,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
   isBoss: 0
+  myTier: 0
   maxHealth: 30
   currentHealth: 0
   invincibilityDuration: 0.2
@@ -205,3 +206,5 @@ MonoBehaviour:
   damageTextPrefab: {fileID: 0}
   targetTag: Player
   destroyOnHit: 0
+  pierceCount: 0
+  bounceCount: 0

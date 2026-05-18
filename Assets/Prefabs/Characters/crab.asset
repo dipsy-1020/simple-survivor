@@ -17,7 +17,7 @@ MonoBehaviour:
   monsterColor: {r: 1, g: 1, b: 1, a: 1}
   scaleMultiplier: 0.8
   tier: 0
-  maxHealth: 55
+  maxHealth: 70
   moveSpeed: 3.5
   useMeleeAttack: 1
   useRangeAttack: 0

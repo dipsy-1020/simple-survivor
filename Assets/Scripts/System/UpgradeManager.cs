@@ -20,7 +20,6 @@ public enum UpgradeType
     FlyingSwordFireRate,
     FlyingSwordCount,
     FlyingSwordPierce,
-    FlyingSwordBounce    // ✨ 飛劍彈射機制
 }
 
 [System.Serializable]
@@ -55,9 +54,14 @@ public class UpgradeManager : MonoBehaviour
     public Transform iconContainer;
     private Dictionary<UpgradeType, Image> activeIconUI = new Dictionary<UpgradeType, Image>();
 
+    private List<MonsterData> pastBosses = new List<MonsterData>();
+
     [HideInInspector] public bool hasRotatingSword = false;
     [HideInInspector] public bool hasFlyingSword = false;
     [HideInInspector] public int extraSwordDamage = 0;
+
+    [Header("武器傷害統一設定")]
+    public int baseSwordDamage = 15; // ✨ 新增這行，以後兩把武器的基礎傷害都在這裡調！
 
     [Header("開局固定流派設定 (二選一)")]
     public UpgradeOption initialBuffA;
@@ -316,14 +320,22 @@ public class UpgradeManager : MonoBehaviour
 
         if (EnemySpawner.instance != null)
         {
-            // 如果選的是 Boss，直接叫生怪器「強制降臨」，不要丟進常規池！
             if (bane.tier == MonsterData.MonsterTier.Boss)
             {
-                EnemySpawner.instance.RegisterFinalBoss(bane);
+                EnemySpawner.instance.RegisterBoss(bane); // 叫出這波選的王
+
+                // ✨ 如果是最後一波，把之前的王全部叫出來大亂鬥！
+                if (GameManager.instance != null && GameManager.instance.currentWave >= 10)
+                {
+                    foreach (var pastBoss in pastBosses)
+                    {
+                        EnemySpawner.instance.RegisterBoss(pastBoss);
+                    }
+                }
+                pastBosses.Add(bane); // 記錄選過的王
             }
             else
             {
-                // 普通怪或菁英怪，正常丟進怪海卡池
                 EnemySpawner.instance.activeMonsterRoster.Add(bane);
             }
         }
@@ -393,11 +405,6 @@ public class UpgradeManager : MonoBehaviour
                 PlayerAutoShoot pasPierce = player.GetComponent<PlayerAutoShoot>();
                 if (pasPierce != null) pasPierce.pierceCount += 1 * multiplier;
                 break;
-
-            case UpgradeType.FlyingSwordBounce:
-                PlayerAutoShoot pasBounce = player.GetComponent<PlayerAutoShoot>();
-                if (pasBounce != null) pasBounce.bounceCount += 1 * multiplier;
-                break;
         }
 
         if (AudioManager.instance != null) AudioManager.instance.PlayLevelUp();
@@ -442,7 +449,14 @@ public class UpgradeManager : MonoBehaviour
     void UpdateAllSwordsDamage()
     {
         UniversalDamageHitbox[] hitboxes = FindObjectsOfType<UniversalDamageHitbox>();
-        foreach (UniversalDamageHitbox h in hitboxes) { if (h.targetTag == "Enemy") h.damage = 10 + extraSwordDamage; }
+        foreach (UniversalDamageHitbox h in hitboxes)
+        {
+            if (h.targetTag == "Enemy")
+            {
+                // ✨ 核心修正：統一使用「基礎傷害 + 額外傷害」
+                h.damage = baseSwordDamage + extraSwordDamage;
+            }
+        }
     }
 
     private void SpawnSwords(int amountToIncrease)

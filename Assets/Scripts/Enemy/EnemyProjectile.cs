@@ -6,71 +6,58 @@ public class EnemyProjectile : MonoBehaviour
     public float speed = 5f;
     public float lifeTime = 5f;
 
-    // ✨ 追蹤導航設定
-    public float homingTurnSpeed = 10f; // 轉向靈敏度 (數值越低轉越大圈，數值越高越像死追)
-    private Transform homingTarget;
+    [Header("追蹤導航設定")]
+    public float homingTurnSpeed = 10f; // 轉向靈敏度
+    public float homingDelay = 0.25f;  // 剛射出時的延遲
 
+    private float currentAge = 0f;
+    private Transform homingTarget;
     private Vector2 flyDirection;
 
-    // ✨ 接收 target 參數
+    // ✨ 新增：穿透時的導航失靈計時器
+    private float disableHomingTimer = 0f;
+
     public void Initialize(Vector2 direction, Transform target = null)
     {
         flyDirection = direction.normalized;
-        homingTarget = target; // 鎖定目標！
+        homingTarget = target;
 
         float angle = Mathf.Atan2(flyDirection.y, flyDirection.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
         Destroy(gameObject, lifeTime);
     }
 
+    // ✨ 新增：給 UniversalDamageHitbox 呼叫的核心方法！
+    // 當穿透發生時，強制讓計時器歸零，並讓導航失靈一段時間
+    public void ResetHomingDelay(float duration)
+    {
+        disableHomingTimer = duration;
+    }
+
     void Update()
     {
-        // ==========================================
-        // ✨ 追蹤導航核心邏輯
-        // ==========================================
-        // 確保目標還活著，並且沒有被摧毀 (activeInHierarchy)
-        if (homingTarget != null && homingTarget.gameObject.activeInHierarchy)
+        currentAge += Time.deltaTime;
+
+        // ✨ 倒數失靈時間
+        if (disableHomingTimer > 0)
         {
-            Vector2 desiredDirection = (homingTarget.position - transform.position).normalized;
+            disableHomingTimer -= Time.deltaTime;
+        }
 
-            // 使用 Slerp (球面線性插值) 讓飛劍「平滑地」轉向，而不是瞬間折角
-            flyDirection = Vector3.Slerp(flyDirection, desiredDirection, homingTurnSpeed * Time.deltaTime).normalized;
+        // ✨ 只有在「開局延遲結束」且「沒有處於穿透失靈狀態」時，才進行導航轉向！
+        if (currentAge >= homingDelay && disableHomingTimer <= 0)
+        {
+            if (homingTarget != null && homingTarget.gameObject.activeInHierarchy)
+            {
+                Vector2 desiredDirection = (homingTarget.position - transform.position).normalized;
+                flyDirection = Vector3.Slerp(flyDirection, desiredDirection, homingTurnSpeed * Time.deltaTime).normalized;
 
-            // 更新劍的圖片面向，讓劍尖永遠朝向飛行方向
-            float angle = Mathf.Atan2(flyDirection.y, flyDirection.x) * Mathf.Rad2Deg;
-            transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
+                float angle = Mathf.Atan2(flyDirection.y, flyDirection.x) * Mathf.Rad2Deg;
+                transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
+            }
         }
 
         // 往前飛行
         transform.Translate(flyDirection * speed * Time.deltaTime, Space.World);
-    }
-
-    // ✨ 新增：彈射尋敵雷達
-    public void BounceToNearestEnemy(GameObject ignoreEnemy)
-    {
-        Collider2D[] hitColliders = Physics2D.OverlapCircleAll(transform.position, 10f); // 彈射索敵半徑 10 公尺
-        float shortestDistance = Mathf.Infinity;
-        GameObject nearestEnemy = null;
-
-        foreach (Collider2D hit in hitColliders)
-        {
-            // 找敵人，且不能是剛剛打中的那隻(防止原地卡死)
-            if (hit.CompareTag("Enemy") && hit.gameObject != ignoreEnemy)
-            {
-                float distance = Vector2.Distance(transform.position, hit.transform.position);
-                if (distance < shortestDistance)
-                {
-                    shortestDistance = distance;
-                    nearestEnemy = hit.gameObject;
-                }
-            }
-        }
-
-        if (nearestEnemy != null)
-        {
-            // 找到新目標，重新設定方向！
-            Vector2 newDirection = (nearestEnemy.transform.position - transform.position).normalized;
-            Initialize(newDirection);
-        }
     }
 }

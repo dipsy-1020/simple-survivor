@@ -45,23 +45,21 @@ public class UniversalDamageHitbox : MonoBehaviour
     {
         if (destroyOnHit)
         {
-            // ==========================================
-            // ✨ 新邏輯：彈射絕對優先！
-            // ==========================================
-            if (bounceCount > 0)
-            {
-                bounceCount--;
-                EnemyProjectile proj = GetComponent<EnemyProjectile>();
-                if (proj != null) proj.BounceToNearestEnemy(hitObj); // 呼叫彈射轉向
-            }
-            // ✨ 彈射次數耗盡後，剩下的動能才用來直線穿透！
-            else if (pierceCount > 0)
+            if (pierceCount > 0)
             {
                 pierceCount--;
+
+                // ✨ 新增：穿透成功時，讓子彈盲飛甩尾！
+                EnemyProjectile proj = GetComponent<EnemyProjectile>();
+                if (proj != null)
+                {
+                    // 讓它穿透後盲飛 0.25 秒再回頭，這個數字越大，繞回來的弧度（圈圈）就越大！
+                    proj.ResetHomingDelay(0.25f);
+                }
             }
             else
             {
-                Destroy(gameObject); // 兩者都沒了，安息吧
+                Destroy(gameObject); // 穿透耗盡，安息吧
             }
         }
     }

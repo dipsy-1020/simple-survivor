@@ -15,7 +15,7 @@ MonoBehaviour:
   monsterName: "\u5BF6\u7BB1\u602A"
   monsterSprite: {fileID: 1191507597351234524, guid: d61dbdba0576e3b41ad63df651e60628, type: 3}
   monsterColor: {r: 1, g: 1, b: 1, a: 1}
-  scaleMultiplier: 3
+  scaleMultiplier: 1.5
   tier: 1
   maxHealth: 300
   moveSpeed: 2.5

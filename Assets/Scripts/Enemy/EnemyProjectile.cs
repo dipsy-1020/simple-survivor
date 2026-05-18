@@ -5,11 +5,19 @@ public class EnemyProjectile : MonoBehaviour
     [Header("子彈設定")]
     public float speed = 5f;
     public float lifeTime = 5f;
+
+    // ✨ 追蹤導航設定
+    public float homingTurnSpeed = 10f; // 轉向靈敏度 (數值越低轉越大圈，數值越高越像死追)
+    private Transform homingTarget;
+
     private Vector2 flyDirection;
 
-    public void Initialize(Vector2 direction)
+    // ✨ 接收 target 參數
+    public void Initialize(Vector2 direction, Transform target = null)
     {
         flyDirection = direction.normalized;
+        homingTarget = target; // 鎖定目標！
+
         float angle = Mathf.Atan2(flyDirection.y, flyDirection.x) * Mathf.Rad2Deg;
         transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
         Destroy(gameObject, lifeTime);
@@ -17,6 +25,23 @@ public class EnemyProjectile : MonoBehaviour
 
     void Update()
     {
+        // ==========================================
+        // ✨ 追蹤導航核心邏輯
+        // ==========================================
+        // 確保目標還活著，並且沒有被摧毀 (activeInHierarchy)
+        if (homingTarget != null && homingTarget.gameObject.activeInHierarchy)
+        {
+            Vector2 desiredDirection = (homingTarget.position - transform.position).normalized;
+
+            // 使用 Slerp (球面線性插值) 讓飛劍「平滑地」轉向，而不是瞬間折角
+            flyDirection = Vector3.Slerp(flyDirection, desiredDirection, homingTurnSpeed * Time.deltaTime).normalized;
+
+            // 更新劍的圖片面向，讓劍尖永遠朝向飛行方向
+            float angle = Mathf.Atan2(flyDirection.y, flyDirection.x) * Mathf.Rad2Deg;
+            transform.rotation = Quaternion.Euler(0, 0, angle - 90f);
+        }
+
+        // 往前飛行
         transform.Translate(flyDirection * speed * Time.deltaTime, Space.World);
     }
 

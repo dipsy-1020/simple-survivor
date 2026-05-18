@@ -60,13 +60,13 @@ public class PlayerExperience : MonoBehaviour
         currentExp -= maxExp;
 
         // ✨ 核心修復：使用「線性加法」取代「乘法」，並設定天花板
-        if (maxExp < 3000)
+        if (maxExp < 1500)
         {
-            maxExp += 100; // 每次升級，下一級只需要「多吃小寶石」的量
+            maxExp += 50; // 每次升級，下一級只需要「多吃小寶石」的量
         }
         else
         {
-            maxExp = 3000; // 等級再高，升級門檻也永遠固定在 500 經驗值
+            maxExp = 1500; // 最高升級門檻
         }
 
         currentLevel++;

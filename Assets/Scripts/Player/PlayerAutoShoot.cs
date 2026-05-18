@@ -52,8 +52,10 @@ public class PlayerAutoShoot : MonoBehaviour
                 float currentAngleOffset = startAngle + (i * spreadAngle);
                 Vector2 fireDirection = Quaternion.Euler(0, 0, currentAngleOffset) * baseDirection;
 
-                // ✨ 將 bounceCount 一起發射出去！
-                attackModule.Fire(fireDirection, totalDamage, "Enemy", pierceCount, bounceCount);
+                // ==========================================
+                // ✨ 將 nearestEnemy.transform 當作追蹤目標傳給飛劍！
+                // ==========================================
+                attackModule.Fire(fireDirection, totalDamage, "Enemy", pierceCount, bounceCount, nearestEnemy.transform);
             }
         }
     }

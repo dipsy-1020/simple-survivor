@@ -38645,7 +38645,7 @@ MonoBehaviour:
   currentElite: 0
   currentBoss: 0
   baseMonsterPrefab: {fileID: 2020265062001631868, guid: 4db1d1e5654b19a4e83055e0c2c17697, type: 3}
-  spawnInterval: 2
+  spawnInterval: 1.5
   spawnPoints:
   - {fileID: 1316183860}
   - {fileID: 1248491020}

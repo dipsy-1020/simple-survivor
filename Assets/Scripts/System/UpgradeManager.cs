@@ -2,6 +2,7 @@
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
+using System.Collections;
 
 // ✨ 包含所有流派與彈射的升級選項
 public enum UpgradeType
@@ -68,14 +69,25 @@ public class UpgradeManager : MonoBehaviour
     [Header("升級庫設定 (玩家 Buff)")]
     public List<UpgradeOption> upgradePool;
 
-    [Header("業障庫設定 (怪物 Bane)")]
-    public List<MonsterData> baneDatabase;
+    // ==========================================
+    // ✨ 核心修改 1：將大雜燴改為三個明確分類的怪物庫
+    // ==========================================
+    [Header("業障庫設定 (分類怪物庫)")]
+    public List<MonsterData> normalMonsters; // 放普通小怪
+    public List<MonsterData> eliteMonsters;  // 放菁英怪
+    public List<MonsterData> bossMonsters;   // 放 Boss
 
     [Header("環繞武器設定")]
     public GameObject swordHandlePrefab;
     public int currentSwordCount = 0;
     public float rotationSpeed = 180f;
-    public float currentSwordScale = 1f;
+    public float currentSwordScale = 1.5f;
+
+    [Header("✨ 狂熱狀態管理")]
+    private bool isFeverActive = false; // 只用一個布林值當作鎖
+    private float normalRotationSpeed;
+    private float normalFireRate;
+    private int normalProjectileCount;
 
     private Transform player;
     private List<GameObject> activeSwords = new List<GameObject>();
@@ -184,27 +196,27 @@ public class UpgradeManager : MonoBehaviour
     {
         List<MonsterData> availableBanes = new List<MonsterData>();
 
-        // ✨ 確認現在是不是最後一波 (第 10 波)
-        bool isFinalWave = false;
-        if (GameManager.instance != null && GameManager.instance.currentWave == GameManager.instance.maxWaves)
-        {
-            isFinalWave = true;
-        }
+        // 獲取即將到來的波次
+        int nextWave = 1;
+        if (GameManager.instance != null) nextWave = GameManager.instance.currentWave;
 
-        // ✨ 過濾怪物圖鑑池：最後一波只出 Boss，前面波次不出 Boss
-        if (baneDatabase != null)
+        // ==========================================
+        // ✨ 核心修改 2：根據波次，直接從分類庫中把怪物倒進抽卡池！
+        // ==========================================
+        if (nextWave == 5 || nextWave == 10)
         {
-            foreach (var bane in baneDatabase)
-            {
-                if (isFinalWave && bane.tier == MonsterData.MonsterTier.Boss)
-                {
-                    availableBanes.Add(bane); // 最後一波專屬
-                }
-                else if (!isFinalWave && bane.tier != MonsterData.MonsterTier.Boss)
-                {
-                    availableBanes.Add(bane); // 常規波次專屬
-                }
-            }
+            // 讀取 Boss 庫
+            if (bossMonsters != null) availableBanes.AddRange(bossMonsters);
+        }
+        else if (nextWave == 3 || nextWave == 7 || nextWave == 8)
+        {
+            // 讀取菁英怪庫
+            if (eliteMonsters != null) availableBanes.AddRange(eliteMonsters);
+        }
+        else
+        {
+            // 其他波次讀取普通怪庫
+            if (normalMonsters != null) availableBanes.AddRange(normalMonsters);
         }
 
         int optionsToShow = Mathf.Min(3, optionButtons.Length);
@@ -242,6 +254,15 @@ public class UpgradeManager : MonoBehaviour
             UpgradeOption selectedBuff = null;
             if (validPool.Count > 0) { selectedBuff = validPool[Random.Range(0, validPool.Count)]; }
             else { selectedBuff = new UpgradeOption { upgradeName = "血中送炭 (生命回復)", type = UpgradeType.MaxHealthUp }; }
+
+            // ==========================================
+            // ✨ 核心修復：解鎖類技能不吃倍率防呆鎖
+            // ==========================================
+            if (selectedBuff.type == UpgradeType.UnlockRotatingSword ||
+                selectedBuff.type == UpgradeType.UnlockFlyingSword)
+            {
+                multiplier = 1; // 強制將倍率壓回 1，避免顯示 x2 或 x3
+            }
 
             // UI 文字與倍率提示
             string multiText = multiplier > 1 ? $" <color=yellow>(效果 x{multiplier})</color>" : "";
@@ -293,7 +314,20 @@ public class UpgradeManager : MonoBehaviour
     private void ApplyBaneUpgrade(UpgradeOption buff, MonsterData bane, int multiplier)
     {
         ApplyUpgrade(buff, multiplier);
-        if (EnemySpawner.instance != null) EnemySpawner.instance.activeMonsterRoster.Add(bane);
+
+        if (EnemySpawner.instance != null)
+        {
+            // 如果選的是 Boss，直接叫生怪器「強制降臨」，不要丟進常規池！
+            if (bane.tier == MonsterData.MonsterTier.Boss)
+            {
+                EnemySpawner.instance.RegisterFinalBoss(bane);
+            }
+            else
+            {
+                // 普通怪或菁英怪，正常丟進怪海卡池
+                EnemySpawner.instance.activeMonsterRoster.Add(bane);
+            }
+        }
     }
 
     // ==========================================
@@ -393,8 +427,15 @@ public class UpgradeManager : MonoBehaviour
         {
             if (swordHandle != null && swordHandle.transform.childCount > 0)
             {
+                // 抓到我們做好的第二層 ScalePivot
                 Transform blade = swordHandle.transform.GetChild(0);
-                blade.localScale = new Vector3(1f, currentSwordScale, 1f);
+
+                // ==========================================
+                // ✨ 終極修正：橫向圖片要縮放 X 軸！
+                // ==========================================
+                // 把原本的 new Vector3(1f, currentSwordScale, 1f);
+                // 改成 new Vector3(currentSwordScale, 1f, 1f);
+                blade.localScale = new Vector3(currentSwordScale, 1f, 1f);
             }
         }
     }
@@ -419,7 +460,17 @@ public class UpgradeManager : MonoBehaviour
             Quaternion initialRotation = Quaternion.Euler(0, 0, angle);
             GameObject newSword = Instantiate(swordHandlePrefab, player.position, initialRotation, player);
             newSword.transform.localPosition = Vector3.zero;
-            if (newSword.transform.childCount > 0) { newSword.transform.GetChild(0).localScale = new Vector3(1f, currentSwordScale, 1f); }
+
+            if (newSword.transform.childCount > 0)
+            {
+                // ==========================================
+                // ✨ 這裡也要改成 X 軸放大！
+                // ==========================================
+                // 把原本的 new Vector3(1f, currentSwordScale, 1f);
+                // 改成下面這樣：
+                newSword.transform.GetChild(0).localScale = new Vector3(currentSwordScale, 1f, 1f);
+            }
+
             activeSwords.Add(newSword);
         }
         UpdateAllSwordsDamage();
@@ -432,17 +483,70 @@ public class UpgradeManager : MonoBehaviour
     }
 
     // ==========================================
-    // 局內全自動微升級
+    // 局內全自動微升級 (不排隊、不連續觸發)
     // ==========================================
     public void ApplyMicroUpgrade()
     {
-        extraSwordDamage += 1;
+        // 1. 永久屬性正常疊加 (一口氣升 3 級就疊 3 次)
+        extraSwordDamage += 2;
         UpdateAllSwordsDamage();
-        rotationSpeed += 5f;
 
         PlayerHealth ph = FindObjectOfType<PlayerHealth>();
-        if (ph != null) { ph.maxHealth += 5; ph.Heal(5); }
+        if (ph != null) { ph.maxHealth += 5; ph.Heal(30); }
 
         if (AudioManager.instance != null) AudioManager.instance.PlayLevelUp();
+
+        // 2. 處理轉速的永久提升
+        if (isFeverActive)
+        {
+            // 如果剛好在狂熱中吃寶石升級，把永久增加的轉速存進「正常值」
+            normalRotationSpeed += 5f;
+        }
+        else
+        {
+            // 否則正常加上去
+            rotationSpeed += 5f;
+        }
+
+        // 3. ✨ 核心修正：如果沒有在狂熱狀態，才觸發 3 秒狂熱！(拒絕排隊)
+        if (!isFeverActive)
+        {
+            StartCoroutine(FeverRoutine());
+        }
+    }
+
+    private IEnumerator FeverRoutine()
+    {
+        isFeverActive = true; // 上鎖，接下來 3 秒內的升級都不會再觸發核爆
+
+        // 1. 紀錄發動前的正常數值
+        normalRotationSpeed = rotationSpeed;
+        PlayerAutoShoot autoShoot = player.GetComponent<PlayerAutoShoot>();
+        if (autoShoot != null)
+        {
+            normalFireRate = autoShoot.fireRate;
+            normalProjectileCount = autoShoot.projectileCount;
+        }
+
+        // 3. 🔥 切換為狂熱數值
+        rotationSpeed = 1000f;
+        if (autoShoot != null)
+        {
+            autoShoot.fireRate = 0.1f;
+            autoShoot.projectileCount = normalProjectileCount + 3;
+        }
+
+        // 4. ⏳ 維持 3 秒
+        yield return new WaitForSeconds(2f);
+
+        // 5. 🛑 狂熱結束，數值回歸正常
+        rotationSpeed = normalRotationSpeed;
+        if (autoShoot != null)
+        {
+            autoShoot.fireRate = normalFireRate;
+            autoShoot.projectileCount = normalProjectileCount;
+        }
+
+        isFeverActive = false; // 解鎖
     }
 }

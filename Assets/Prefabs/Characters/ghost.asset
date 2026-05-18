@@ -10,16 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 348c5ab282986fb489c7076e17c4d20e, type: 3}
-  m_Name: MonsterData3
+  m_Name: ghost
   m_EditorClassIdentifier: Assembly-CSharp::MonsterData
-  monsterName: "\u83C1\u82F1\u4ED9\u4EBA\u638C"
-  monsterSprite: {fileID: -1714780869122909990, guid: 1770eec9f3d556047a4464f1bd7de0b6, type: 3}
-  monsterColor: {r: 1, g: 0.25, b: 0.25, a: 1}
-  scaleMultiplier: 1.5
+  monsterName: "\u5E7D\u9B42"
+  monsterSprite: {fileID: 911841031958816375, guid: 67c383b2bb6351b40a27bcfd107216cf, type: 3}
+  monsterColor: {r: 1, g: 1, b: 1, a: 1}
+  scaleMultiplier: 1.1
   tier: 1
-  maxHealth: 45
-  moveSpeed: 3
-  useMeleeAttack: 1
-  useRangeAttack: 0
+  maxHealth: 60
+  moveSpeed: 5.4
+  useMeleeAttack: 0
+  useRangeAttack: 1
   projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}
   brainType: 0
+  chargeDistance: 6
+  chargePrepTime: 0.5
+  chargeCooldown: 3
+  stoppingDistance: 6
+  fireRate: 1.2
+  rangedAttackDamage: 15
+  bossAttackInterval: 4
+  bossBulletDamage: 20

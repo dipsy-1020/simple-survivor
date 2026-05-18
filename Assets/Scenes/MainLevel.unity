@@ -33378,7 +33378,7 @@ CircleCollider2D:
   m_CompositeOperation: 0
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
-  m_Radius: 2
+  m_Radius: 3
 --- !u!1 &310658302
 GameObject:
   m_ObjectHideFlags: 0
@@ -33701,7 +33701,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5
+  orthographic size: 8
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -33728,7 +33728,7 @@ Transform:
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -521.0312, y: -284.86304, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 1287541651}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -33945,7 +33945,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e42f9b04aad3e6498660751f1cfef04, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerController
-  moveSpeed: 5
+  moveSpeed: 7.5
 --- !u!50 &621481793
 Rigidbody2D:
   serializedVersion: 5
@@ -34116,7 +34116,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerExperience
   currentExp: 0
-  maxExp: 10
+  maxExp: 100
   expBarFill: {fileID: 1153245753}
   levelText: {fileID: 1908818338}
 --- !u!114 &621481799
@@ -34616,10 +34616,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 317724447}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -67}
-  m_SizeDelta: {x: 600, y: 72}
+  m_SizeDelta: {x: 0, y: 72}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &918321433
 MonoBehaviour:
@@ -35226,7 +35226,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1512564901}
         m_TargetAssemblyTypeName: GameManager, Assembly-CSharp
-        m_MethodName: StartGame
+        m_MethodName: StartFirstWave
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -35385,10 +35385,10 @@ RectTransform:
   - {fileID: 1260840081}
   m_Father: {fileID: 1023136367}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 1}
-  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -15}
-  m_SizeDelta: {x: 1218, y: 30}
+  m_SizeDelta: {x: 0, y: 30}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1250278807
 MonoBehaviour:
@@ -38638,8 +38638,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 879b8fda3fd20cb45bf517199ab8cfa3, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemySpawner
+  maxNormal: 150
+  maxElite: 15
+  maxBoss: 2
+  currentNormal: 0
+  currentElite: 0
+  currentBoss: 0
   baseMonsterPrefab: {fileID: 2020265062001631868, guid: 4db1d1e5654b19a4e83055e0c2c17697, type: 3}
-  spawnInterval: 1.2
+  spawnInterval: 2
   spawnPoints:
   - {fileID: 1316183860}
   - {fileID: 1248491020}
@@ -38701,7 +38707,7 @@ MonoBehaviour:
     requiresFlyingSword: 0
     maxLevel: 1
     currentLevel: 0
-  initialBaneA: {fileID: 11400000, guid: a0487d37a28e41345b0bbee0ff47383a, type: 2}
+  initialBaneA: {fileID: 11400000, guid: ba4307e7291df37488b337ccc4becd09, type: 2}
   initialBuffB:
     upgradeName: "\u5FA1\u528D\u8853"
     icon: {fileID: 21300000, guid: 139896ae9c7105140bf96a66f05e1c40, type: 3}
@@ -38710,7 +38716,7 @@ MonoBehaviour:
     requiresFlyingSword: 0
     maxLevel: 1
     currentLevel: 0
-  initialBaneB: {fileID: 11400000, guid: a1b4d7a54ebca3b4798afad50995246a, type: 2}
+  initialBaneB: {fileID: 11400000, guid: b71daed8f2b568d4cb69a4860fcd6c09, type: 2}
   upgradePool:
   - upgradeName: "\u589E\u52A0\u74B0\u7E5E\u528D"
     icon: {fileID: 21300000, guid: c68838cd724d5cc4a89b38f46c68a7d1, type: 3}
@@ -38775,17 +38781,21 @@ MonoBehaviour:
     requiresFlyingSword: 1
     maxLevel: 6
     currentLevel: 0
-  baneDatabase:
-  - {fileID: 11400000, guid: a0487d37a28e41345b0bbee0ff47383a, type: 2}
-  - {fileID: 11400000, guid: 63834b8f7075ed241b3f372638b2917e, type: 2}
-  - {fileID: 11400000, guid: a1b4d7a54ebca3b4798afad50995246a, type: 2}
-  - {fileID: 11400000, guid: 25050091cb9f52a41b257b7a9234ead9, type: 2}
-  - {fileID: 11400000, guid: 5190a92ab9b8d904a933cbf1946f5d60, type: 2}
-  - {fileID: 11400000, guid: 92079ab652ed62141900c82fb2a189e8, type: 2}
+  normalMonsters:
+  - {fileID: 11400000, guid: b71daed8f2b568d4cb69a4860fcd6c09, type: 2}
+  - {fileID: 11400000, guid: ba4307e7291df37488b337ccc4becd09, type: 2}
+  - {fileID: 11400000, guid: a3ac25aae223de94e9b3ec18c734ef6e, type: 2}
+  eliteMonsters:
+  - {fileID: 11400000, guid: c01e92f7544f66346869b4ad211a5945, type: 2}
+  - {fileID: 11400000, guid: 2d65e421967929c419422baa8c810d7b, type: 2}
+  - {fileID: 11400000, guid: 3508f46018c3b16468084c3af6f28ffc, type: 2}
+  bossMonsters:
+  - {fileID: 11400000, guid: ed4d4eec8504b58499580c86614ad9d5, type: 2}
+  - {fileID: 11400000, guid: a3e1c7635a462504883c70f045d9e5b8, type: 2}
   swordHandlePrefab: {fileID: 3252474660462478482, guid: 0d2b98610ac353c449d52dcbc98d3226, type: 3}
   currentSwordCount: 0
   rotationSpeed: 180
-  currentSwordScale: 1
+  currentSwordScale: 1.5
 --- !u!114 &1512564901
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -39860,7 +39870,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: "\u76EE\u6A19\uFF1A\u751F\u5B58\u5341\u5206\u9418\u6216\u64CA\u6557\u4E5D\u5206\u9418\u51FA\u73FE\u7684BOSS\uFF01\n\u73A9\u6CD5\uFF1A\u7528WASD\u79FB\u52D5\uFF0C\u6B66\u5668\u6703\u81EA\u52D5\u653B\u64CA\u3002\u64BF\u8D77\u7D93\u9A57\u7403\u589E\u52A0\u7D93\u9A57\uFF0C\u5347\u7D1A\u53EF\u4EE5\u7372\u5F97\u5F37\u5316\uFF01"
+  m_text: "\u76EE\u6A19\uFF1A\u751F\u5B58\u5341\u5206\u9418\uFF01\n\u73A9\u6CD5\uFF1A\u7528WASD\u79FB\u52D5\uFF0C\u6B66\u5668\u6703\u81EA\u52D5\u653B\u64CA\u3002\u64BF\u8D77\u80FD\u91CF\u7403\u7A4D\u84C4\u80FD\u91CF\uFF0C\u56DE\u8840\uFF0C\u7372\u5F97\u72C2\u71B1\u7206\u767C\u8207\u5F37\u5316\u57FA\u790E\u6578\u503C\uFF01"
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: caa7c867027df40479ec46046022beb7, type: 2}
   m_sharedMaterial: {fileID: -2399418764754087974, guid: caa7c867027df40479ec46046022beb7, type: 2}
@@ -39929,7 +39939,7 @@ MonoBehaviour:
   m_margin: {x: 0, y: 0, z: 0, w: 0}
   m_isUsingLegacyAnimationComponent: 0
   m_isVolumetricText: 0
-  m_hasFontAssetChanged: 1
+  m_hasFontAssetChanged: 0
   m_baseMaterial: {fileID: 0}
   m_maskOffset: {x: 0, y: 0, z: 0, w: 0}
 --- !u!222 &2023044313

@@ -151,5 +151,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c48225e0bc385d34194f4d7e833c7138, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Gem
-  expValue: 50
+  expValue: 10
   moveSpeed: 15

@@ -4,6 +4,9 @@ public class EnemyHealth : MonoBehaviour
 {
     [Header("身份設定")]
     public bool isBoss = false;
+    // ✨ 新增：記錄自己的階級，方便死掉時扣除計數
+    [HideInInspector] public MonsterData.MonsterTier myTier;
+    private bool isShuttingDown = false; // 防呆：避免關閉遊戲時報錯
 
     [Header("敵人血量設定")]
     public int maxHealth = 30;
@@ -83,5 +86,21 @@ public class EnemyHealth : MonoBehaviour
         {
             if (GameManager.instance != null) GameManager.instance.Victory();
         }
+    }
+
+    // ✨ 新增這兩個方法在腳本最底下
+    void OnApplicationQuit()
+    {
+        isShuttingDown = true;
+    }
+
+    void OnDestroy()
+    {
+        if (isShuttingDown || EnemySpawner.instance == null) return;
+
+        // 當怪物死亡或被波次清場時，把自己的數量從生成器中扣除
+        if (myTier == MonsterData.MonsterTier.Normal) EnemySpawner.instance.currentNormal--;
+        else if (myTier == MonsterData.MonsterTier.Elite) EnemySpawner.instance.currentElite--;
+        else if (myTier == MonsterData.MonsterTier.Boss) EnemySpawner.instance.currentBoss--;
     }
 }

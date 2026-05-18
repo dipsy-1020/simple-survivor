@@ -10,16 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 348c5ab282986fb489c7076e17c4d20e, type: 3}
-  m_Name: MonsterData0
+  m_Name: cyclops
   m_EditorClassIdentifier: Assembly-CSharp::MonsterData
-  monsterName: "\u666E\u901A\u4ED9\u4EBA\u638C"
-  monsterSprite: {fileID: -1714780869122909990, guid: 1770eec9f3d556047a4464f1bd7de0b6, type: 3}
+  monsterName: "\u7368\u773C\u5DE8\u4EBA"
+  monsterSprite: {fileID: 4807775697852972887, guid: 9d221f16d17cfa44ebb3954f07a0f9b7, type: 3}
   monsterColor: {r: 1, g: 1, b: 1, a: 1}
   scaleMultiplier: 1
-  tier: 0
-  maxHealth: 24
-  moveSpeed: 2.5
-  useMeleeAttack: 0
+  tier: 2
+  maxHealth: 600
+  moveSpeed: 10.5
+  useMeleeAttack: 1
   useRangeAttack: 0
   projectilePrefab: {fileID: 0}
-  brainType: 0
+  brainType: 1
+  chargeDistance: 8
+  chargePrepTime: 1.2
+  chargeCooldown: 5
+  stoppingDistance: 5
+  fireRate: 2
+  rangedAttackDamage: 10
+  bossAttackInterval: 4
+  bossBulletDamage: 20

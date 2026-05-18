@@ -10,16 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 348c5ab282986fb489c7076e17c4d20e, type: 3}
-  m_Name: MonsterData2
+  m_Name: crab
   m_EditorClassIdentifier: Assembly-CSharp::MonsterData
-  monsterName: "\u666E\u901A\u8759\u8760"
-  monsterSprite: {fileID: 6091706668691328248, guid: 5995f0912264c2a4b8da6237d0318310, type: 3}
+  monsterName: "\u8783\u87F9"
+  monsterSprite: {fileID: -5829726057563536327, guid: 03e1494567fe53f44ab5cd9bc409b1ae, type: 3}
   monsterColor: {r: 1, g: 1, b: 1, a: 1}
-  scaleMultiplier: 1
+  scaleMultiplier: 0.9
   tier: 0
-  maxHealth: 19
-  moveSpeed: 3.5
-  useMeleeAttack: 0
-  useRangeAttack: 1
-  projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}
-  brainType: 2
+  maxHealth: 25
+  moveSpeed: 4.5
+  useMeleeAttack: 1
+  useRangeAttack: 0
+  projectilePrefab: {fileID: 0}
+  brainType: 1
+  chargeDistance: 4
+  chargePrepTime: 0.8
+  chargeCooldown: 4
+  stoppingDistance: 5
+  fireRate: 2
+  rangedAttackDamage: 10
+  bossAttackInterval: 4
+  bossBulletDamage: 20

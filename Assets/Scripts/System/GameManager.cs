@@ -28,17 +28,36 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // 遊戲開始時，初始化第一波的時間
+        // 初始化第一波的時間
         waveTimer = waveDuration;
 
-        // ✨ 修改這裡：遊戲開局直接凍結時間，並呼叫 UpgradeManager 彈出二選一
+        // 1. 遊戲開局先凍結時間
         Time.timeScale = 0f;
         UpdateTimerUI();
 
+        // 2. 打開介紹面板 (使用你原本寫好的 startPanel)
+        if (startPanel != null)
+        {
+            startPanel.SetActive(true);
+        }
+        else
+        {
+            // 防呆：如果忘記放面板，直接跳轉二選一
+            StartFirstWave();
+        }
+    }
+
+    // ✨ 新增：這個方法要綁定給 startPanel 裡面的「開始戰鬥」按鈕
+    public void StartFirstWave()
+    {
+        // 關閉介紹面板
+        if (startPanel != null) startPanel.SetActive(false);
+
+        // 呼叫 UpgradeManager 彈出開局二選一！
         UpgradeManager um = FindObjectOfType<UpgradeManager>();
         if (um != null)
         {
-            um.ShowInitialMenu(); // 呼叫我們即將寫好的開局專用選單
+            um.ShowInitialMenu();
         }
     }
 

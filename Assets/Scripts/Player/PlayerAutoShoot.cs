@@ -8,7 +8,6 @@ public class PlayerAutoShoot : MonoBehaviour
     public int projectileCount = 1;
     public float spreadAngle = 15f;
     public int pierceCount = 0;
-    public int bounceCount = 0; // ✨ 新增記錄彈射次數
 
     [Header("索敵設定")]
     public float detectionRadius = 8f;
@@ -61,7 +60,7 @@ public class PlayerAutoShoot : MonoBehaviour
                 // ==========================================
                 // ✨ 將 nearestEnemy.transform 當作追蹤目標傳給飛劍！
                 // ==========================================
-                attackModule.Fire(fireDirection, totalDamage, "Enemy", pierceCount, bounceCount, nearestEnemy.transform);
+                attackModule.Fire(fireDirection, totalDamage, "Enemy", pierceCount, nearestEnemy.transform);
             }
         }
     }

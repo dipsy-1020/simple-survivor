@@ -9,7 +9,6 @@ public class UniversalDamageHitbox : MonoBehaviour
     public bool destroyOnHit = false;
 
     public int pierceCount = 0;
-    public int bounceCount = 0; // ✨ 新增：彈射次數
 
     private void OnTriggerEnter2D(Collider2D other) { DealDamage(other.gameObject); }
     private void OnCollisionEnter2D(Collision2D collision) { DealDamage(collision.gameObject); }

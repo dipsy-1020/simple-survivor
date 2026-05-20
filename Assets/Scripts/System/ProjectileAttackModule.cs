@@ -7,7 +7,7 @@ public class ProjectileAttackModule : MonoBehaviour
     public Transform firePoint;
 
     // ✨ 在括號最後面新增：Transform target = null
-    public void Fire(Vector2 direction, int damage, string targetTag, int pierceCount = 0, int bounceCount = 0, Transform target = null)
+    public void Fire(Vector2 direction, int damage, string targetTag, int pierceCount = 0, Transform target = null)
     {
         if (projectilePrefab == null || firePoint == null) return;
         GameObject bullet = Instantiate(projectilePrefab, firePoint.position, Quaternion.identity);
@@ -23,7 +23,6 @@ public class ProjectileAttackModule : MonoBehaviour
             hitbox.targetTag = targetTag;
             hitbox.destroyOnHit = true;
             hitbox.pierceCount = pierceCount;
-            hitbox.bounceCount = bounceCount;
         }
     }
 }

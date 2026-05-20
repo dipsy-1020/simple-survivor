@@ -12,8 +12,7 @@ GameObject:
   - component: {fileID: 7838461596758525339}
   - component: {fileID: 6292112017905725634}
   - component: {fileID: 4671235912839232588}
-  - component: {fileID: 8779195001907769871}
-  - component: {fileID: 1625429947417247599}
+  - component: {fileID: 4603575125597541381}
   m_Layer: 0
   m_Name: EnemyProjectile_SonicWave
   m_TagString: Untagged
@@ -31,8 +30,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 1.5436724, y: 0.71020997, z: 0}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.75, y: 0.75, z: 0.75}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -158,7 +157,7 @@ CircleCollider2D:
   m_CompositeOrder: 0
   m_Offset: {x: 0, y: 0}
   m_Radius: 0.4375
---- !u!114 &8779195001907769871
+--- !u!114 &4603575125597541381
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -167,24 +166,11 @@ MonoBehaviour:
   m_GameObject: {fileID: 7582529407957700068}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ec44e740a05ad8e4394ffa23d16550b0, type: 3}
+  m_Script: {fileID: 11500000, guid: cd1d4908489f0a8448859d4810db0f14, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyProjectile
-  speed: 5
-  lifeTime: 5
---- !u!114 &1625429947417247599
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7582529407957700068}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d4e94fab57a8305499db0711a22bbafa, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::UniversalDamageHitbox
-  damage: 10
-  damageTextPrefab: {fileID: 0}
+  m_EditorClassIdentifier: Assembly-CSharp::Projectile
+  speed: 10
+  lifeTime: 3
+  rotationOffset: -90
+  damage: 15
   targetTag: Player
-  destroyOnHit: 1

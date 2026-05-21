@@ -174,6 +174,8 @@ MonoBehaviour:
   maxHealth: 75
   expGemPrefab: {fileID: 6922196530758687321, guid: 0c88636f0f514804c90716e71a67ccaf, type: 3}
   damageTextPrefab: {fileID: 7675475905614218229, guid: e8f4e5cb1a9de2442aabced2d437a603, type: 3}
+  healItemPrefab: {fileID: 6922196530758687321, guid: f21d868d09b900b4897a593a48f8720d, type: 3}
+  healDropChance: 0.05
 --- !u!114 &-7756109462829891332
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -187,5 +189,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeAI
   speed: 2.3
+  stopDistance: 0.5
   damage: 15
   damageCooldown: 1

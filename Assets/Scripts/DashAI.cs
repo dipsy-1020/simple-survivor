@@ -2,13 +2,13 @@ using UnityEngine;
 
 public class DashAI : MonoBehaviour
 {
-    [Header("°òÂ¦³]©w")]
+    [Header("ï¿½ï¿½Â¦ï¿½]ï¿½w")]
     public float normalSpeed = 2.5f;
     public int damage = 15;
     public float damageCooldown = 1f;
     private float lastDamageTime;
 
-    [Header("½Ä¨ë§Þ¯à")]
+    [Header("ï¿½Ä¨ï¿½Þ¯ï¿½")]
     public float dashSpeed = 10f;
     public float dashDuration = 0.5f;
     public float dashCooldown = 4f;
@@ -36,7 +36,6 @@ public class DashAI : MonoBehaviour
     {
         if (player == null) return;
 
-        // ÀH®É­±´Âª±®a
         float dirX = player.position.x - transform.position.x;
         if (dirX != 0) sr.flipX = dirX < 0;
 
@@ -49,6 +48,8 @@ public class DashAI : MonoBehaviour
             {
                 isDashing = false;
                 dashCooldownTimer = dashCooldown;
+                // ï¿½Ä¨ëµ²ï¿½ï¿½ï¿½Éªï¿½ï¿½ï¿½ï¿½Mï¿½Å³tï¿½×¡Aï¿½ï¿½ï¿½ï¿½Dï¿½Ê·Æ¦ï¿½
+                rb.linearVelocity = Vector2.zero;
             }
         }
         else

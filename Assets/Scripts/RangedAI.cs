@@ -2,11 +2,11 @@ using UnityEngine;
 
 public class RangedAI : MonoBehaviour
 {
-    [Header("���ʳ]�w")]
+    [Header("移動設定")]
     public float speed = 2f;
     public float stopDistance = 6f;
 
-    [Header("�g���]�w")]
+    [Header("射擊設定")]
     public GameObject projectilePrefab;
     public float fireRate = 2f;
     private float fireTimer;
@@ -28,7 +28,7 @@ public class RangedAI : MonoBehaviour
     {
         if (player == null) return;
 
-        // �H�ɭ��ª��a
+        // 隨時面朝玩家
         float dirX = player.position.x - transform.position.x;
         if (dirX != 0) sr.flipX = dirX < 0;
 
@@ -36,8 +36,14 @@ public class RangedAI : MonoBehaviour
 
         if (distanceToPlayer > stopDistance)
         {
+            // 距離大於 stopDistance：走向玩家
             Vector2 direction = (player.position - transform.position).normalized;
             rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
+        }
+        else
+        {
+            // 進入射程內：確保速度歸零，穩穩停在原地，不後退逃跑
+            rb.linearVelocity = Vector2.zero;
         }
     }
 

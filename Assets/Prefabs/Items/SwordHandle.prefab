@@ -206,4 +206,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 0b5be6ad20d3e514e9235d64d83b1b40, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::OrbitalWeapon
-  damage: 15
+  damage: 25

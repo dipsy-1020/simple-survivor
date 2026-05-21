@@ -151,6 +151,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d656e0fcea3240742bd5bf4dfc7f8fb1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ExpGem
-  expValue: 10
+  expValue: 15
   magnetRadius: 3
-  moveSpeed: 8
+  repelSpeed: 6
+  repelDuration: 0.25
+  absorbSpeed: 8

@@ -2,10 +2,11 @@ using UnityEngine;
 
 public class MeleeAI : MonoBehaviour
 {
-    [Header("²¾°Ê³]©w")]
+    [Header("ï¿½ï¿½ï¿½Ê³]ï¿½w")]
     public float speed = 3f;
+    public float stopDistance = 0.5f; // ï¿½sï¿½Wï¿½Gï¿½Pï¿½ï¿½ï¿½aï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Zï¿½ï¿½ï¿½]ï¿½Pï¿½wï¿½ï¿½ï¿½ï¿½Ä²ï¿½^
 
-    [Header("¶Ë®`³]©w")]
+    [Header("ï¿½Ë®`ï¿½]ï¿½w")]
     public int damage = 10;
     public float damageCooldown = 1f;
     private float lastDamageTime;
@@ -27,11 +28,22 @@ public class MeleeAI : MonoBehaviour
     {
         if (player == null) return;
 
+        float distance = Vector2.Distance(transform.position, player.position);
         Vector2 direction = (player.position - transform.position).normalized;
-        rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
 
-        // ­±´Â¦Vª±®a
+        // ï¿½ï¿½ï¿½Â¦Vï¿½ï¿½ï¿½a
         if (direction.x != 0) sr.flipX = direction.x < 0;
+
+        // ï¿½uï¿½ï¿½ï¿½bï¿½Wï¿½L stopDistance ï¿½É¤~ï¿½ï¿½ï¿½Ê¡Aï¿½_ï¿½hï¿½Oï¿½ï¿½ï¿½Rï¿½ï¿½
+        if (distance > stopDistance)
+        {
+            rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
+        }
+        else
+        {
+            // ï¿½iï¿½Jï¿½ï¿½Ä²ï¿½dï¿½ï¿½Gï¿½jï¿½î­«ï¿½mï¿½tï¿½×¡Aï¿½ï¿½ï¿½ï¿½Dï¿½Ê·Æ°ï¿½
+            rb.linearVelocity = Vector2.zero;
+        }
     }
 
     void OnCollisionStay2D(Collision2D collision)

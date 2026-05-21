@@ -145,5 +145,5 @@ MonoBehaviour:
   speed: 20
   lifeTime: 3
   rotationOffset: -90
-  damage: 10
+  damage: 20
   targetTag: Enemy

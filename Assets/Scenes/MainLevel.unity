@@ -33575,7 +33575,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 22.03, y: 19.9, z: -10}
+  m_LocalPosition: {x: 0, y: 0, z: -10}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -38791,9 +38791,12 @@ MonoBehaviour:
     levelDuration: 150
     spawnInterval: 1.5
     enemyPool:
-    - {fileID: 413850948191185313, guid: a7d0bb58e7a163c4d91b0b827529a48d, type: 3}
-    - {fileID: 413850948191185313, guid: ff4e8837cb42e0343b807da912d3edb6, type: 3}
     - {fileID: 413850948191185313, guid: 391bc661f8e49164ba33488c9ee97420, type: 3}
+    - {fileID: 413850948191185313, guid: ff4e8837cb42e0343b807da912d3edb6, type: 3}
+    eliteSpawnInterval: 15
+    elitePool:
+    - {fileID: 413850948191185313, guid: a7d0bb58e7a163c4d91b0b827529a48d, type: 3}
+    eliteTimer: 0
     bossPrefab: {fileID: 413850948191185313, guid: 3ad62163c9a88ad43a9dba8f04391ab7, type: 3}
     bossSpawnTime: 115
     bossSpawned: 0
@@ -38805,43 +38808,53 @@ MonoBehaviour:
     - {fileID: 413850948191185313, guid: ff4e8837cb42e0343b807da912d3edb6, type: 3}
     - {fileID: 413850948191185313, guid: 391bc661f8e49164ba33488c9ee97420, type: 3}
     - {fileID: 413850948191185313, guid: 3ad62163c9a88ad43a9dba8f04391ab7, type: 3}
-    - {fileID: 413850948191185313, guid: 23fc59ba01096724b9a585fcb37ee3b0, type: 3}
-    bossPrefab: {fileID: 413850948191185313, guid: ee2fd01d9d6467943abc86d6852a31b6, type: 3}
+    eliteSpawnInterval: 15
+    elitePool:
+    - {fileID: 3348967974901220538, guid: 89f8db0b2b208784284768d504485a6a, type: 3}
+    eliteTimer: 0
+    bossPrefab: {fileID: 413850948191185313, guid: cc358d4bf68caba41abc6b43d08ef86d, type: 3}
     bossSpawnTime: 115
     bossSpawned: 0
   - levelName: Hard
     levelDuration: 150
     spawnInterval: 0.5
     enemyPool:
-    - {fileID: 3348967974901220538, guid: 89f8db0b2b208784284768d504485a6a, type: 3}
-    - {fileID: 413850948191185313, guid: 326a8ce5ab9327e4da89bda3aa1f2fb0, type: 3}
-    - {fileID: 413850948191185313, guid: 391bc661f8e49164ba33488c9ee97420, type: 3}
-    - {fileID: 413850948191185313, guid: ee2fd01d9d6467943abc86d6852a31b6, type: 3}
-    - {fileID: 413850948191185313, guid: ff4e8837cb42e0343b807da912d3edb6, type: 3}
-    - {fileID: 413850948191185313, guid: 23fc59ba01096724b9a585fcb37ee3b0, type: 3}
     - {fileID: 413850948191185313, guid: a7d0bb58e7a163c4d91b0b827529a48d, type: 3}
-    bossPrefab: {fileID: 413850948191185313, guid: cc358d4bf68caba41abc6b43d08ef86d, type: 3}
+    - {fileID: 413850948191185313, guid: 3ad62163c9a88ad43a9dba8f04391ab7, type: 3}
+    - {fileID: 413850948191185313, guid: ff4e8837cb42e0343b807da912d3edb6, type: 3}
+    - {fileID: 413850948191185313, guid: 391bc661f8e49164ba33488c9ee97420, type: 3}
+    eliteSpawnInterval: 15
+    elitePool:
+    - {fileID: 413850948191185313, guid: cc358d4bf68caba41abc6b43d08ef86d, type: 3}
+    - {fileID: 413850948191185313, guid: 23fc59ba01096724b9a585fcb37ee3b0, type: 3}
+    - {fileID: 413850948191185313, guid: 326a8ce5ab9327e4da89bda3aa1f2fb0, type: 3}
+    eliteTimer: 0
+    bossPrefab: {fileID: 413850948191185313, guid: ee2fd01d9d6467943abc86d6852a31b6, type: 3}
     bossSpawnTime: 115
     bossSpawned: 0
   - levelName: Hell
     levelDuration: 150
     spawnInterval: 0.3
     enemyPool:
-    - {fileID: 413850948191185313, guid: a7d0bb58e7a163c4d91b0b827529a48d, type: 3}
-    - {fileID: 413850948191185313, guid: 23fc59ba01096724b9a585fcb37ee3b0, type: 3}
-    - {fileID: 413850948191185313, guid: ff4e8837cb42e0343b807da912d3edb6, type: 3}
-    - {fileID: 413850948191185313, guid: 326a8ce5ab9327e4da89bda3aa1f2fb0, type: 3}
-    - {fileID: 3348967974901220538, guid: 89f8db0b2b208784284768d504485a6a, type: 3}
     - {fileID: 413850948191185313, guid: 391bc661f8e49164ba33488c9ee97420, type: 3}
+    - {fileID: 3348967974901220538, guid: 89f8db0b2b208784284768d504485a6a, type: 3}
+    - {fileID: 413850948191185313, guid: a7d0bb58e7a163c4d91b0b827529a48d, type: 3}
+    - {fileID: 413850948191185313, guid: ff4e8837cb42e0343b807da912d3edb6, type: 3}
     - {fileID: 413850948191185313, guid: 3ad62163c9a88ad43a9dba8f04391ab7, type: 3}
-    - {fileID: 413850948191185313, guid: cc358d4bf68caba41abc6b43d08ef86d, type: 3}
+    eliteSpawnInterval: 15
+    elitePool:
     - {fileID: 413850948191185313, guid: ee2fd01d9d6467943abc86d6852a31b6, type: 3}
+    - {fileID: 413850948191185313, guid: cc358d4bf68caba41abc6b43d08ef86d, type: 3}
+    - {fileID: 413850948191185313, guid: 326a8ce5ab9327e4da89bda3aa1f2fb0, type: 3}
+    - {fileID: 413850948191185313, guid: 23fc59ba01096724b9a585fcb37ee3b0, type: 3}
+    eliteTimer: 0
     bossPrefab: {fileID: 413850948191185313, guid: 4cfb091c356561546903a31288a21692, type: 3}
     bossSpawnTime: 115
     bossSpawned: 0
-  currentLevelIndex: 0
   fieldMin: {x: -23, y: -12}
   fieldMax: {x: 21, y: 19}
+  safeRadius: 6
+  minSpawnInterval: 0.4
 --- !u!114 &1512564901
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -38863,12 +38876,11 @@ MonoBehaviour:
   - {fileID: 1184582130}
   - {fileID: 724026689}
   - {fileID: 1517623099}
-  hasOrbital: 0
-  hasFlyingSword: 0
   flyingSwordBurstCount: 1
   flyingSwordCountPerShot: 1
-  canRicochet: 0
+  flyingSwordBounceCount: 0
   orbitalLifestealChance: 0
+  maxUpgradeLevel: 5
 --- !u!114 &1512564902
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6903418388319115117}
+  - component: {fileID: -8280640614023610720}
   m_Layer: 0
   m_Name: DamageTextPrefab
   m_TagString: Untagged
@@ -32,6 +33,21 @@ Transform:
   - {fileID: 5463495090097090270}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &-8280640614023610720
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7675475905614218229}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 79d0e31f7dcbd774b843547e73dd3389, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::DamageText
+  moveSpeed: 2
+  destroyTime: 0.6
+  randomizeOffset: {x: 0.5, y: 0.5, z: 0}
 --- !u!1 &7939943803726145542
 GameObject:
   m_ObjectHideFlags: 0

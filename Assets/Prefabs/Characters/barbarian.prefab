@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 4322306133419166010}
   - component: {fileID: 2106339978715968114}
   - component: {fileID: -1283961444518177743}
-  - component: {fileID: -3084623979961745523}
   m_Layer: 0
   m_Name: barbarian
   m_TagString: Enemy
@@ -172,8 +171,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 152f17e2f001b66439a920bfd42d0dad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 20
+  maxHealth: 45
   expGemPrefab: {fileID: 6922196530758687321, guid: 0c88636f0f514804c90716e71a67ccaf, type: 3}
+  damageTextPrefab: {fileID: 7675475905614218229, guid: e8f4e5cb1a9de2442aabced2d437a603, type: 3}
 --- !u!114 &-1283961444518177743
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,20 +186,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 387fbd1132280f74ab7a16006edf7f72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeAI
-  speed: 3
-  damage: 10
-  damageCooldown: 1
---- !u!114 &-3084623979961745523
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 413850948191185313}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3634513d48831c4db3d95c2307664d2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyDamage
-  damage: 10
+  speed: 2.8
+  damage: 25
   damageCooldown: 1

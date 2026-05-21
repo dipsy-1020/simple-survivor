@@ -142,7 +142,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cd1d4908489f0a8448859d4810db0f14, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
-  speed: 10
+  speed: 20
   lifeTime: 3
-  damage: 15
+  rotationOffset: -90
+  damage: 10
   targetTag: Enemy

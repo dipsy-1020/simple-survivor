@@ -14,7 +14,6 @@ GameObject:
   - component: {fileID: 4322306133419166010}
   - component: {fileID: 2106339978715968114}
   - component: {fileID: -6406034014448741373}
-  - component: {fileID: 280899414317871095}
   m_Layer: 0
   m_Name: ghost
   m_TagString: Enemy
@@ -172,8 +171,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 152f17e2f001b66439a920bfd42d0dad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 20
+  maxHealth: 50
   expGemPrefab: {fileID: 6922196530758687321, guid: 0c88636f0f514804c90716e71a67ccaf, type: 3}
+  damageTextPrefab: {fileID: 7675475905614218229, guid: e8f4e5cb1a9de2442aabced2d437a603, type: 3}
 --- !u!114 &-6406034014448741373
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -186,21 +186,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f4a43f5a56d50864aa18dd496bb9b5e8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::RangedAI
-  speed: 2
-  stopDistance: 6
+  speed: 3
+  stopDistance: 5
   projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}
-  fireRate: 2
---- !u!114 &280899414317871095
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 413850948191185313}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b3634513d48831c4db3d95c2307664d2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyDamage
-  damage: 10
-  damageCooldown: 1
+  fireRate: 0.75

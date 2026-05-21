@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 
 public class PlayerHealth : MonoBehaviour
 {
@@ -6,10 +7,12 @@ public class PlayerHealth : MonoBehaviour
     public int maxHealth = 100;
     private int currentHealth;
 
+    private SpriteRenderer sr;
+
     void Start()
     {
         currentHealth = maxHealth;
-        // 改為呼叫 GameManager
+        sr = GetComponent<SpriteRenderer>();
         if (GameManager.instance != null) GameManager.instance.UpdateHPUI(currentHealth, maxHealth);
     }
 
@@ -20,9 +23,23 @@ public class PlayerHealth : MonoBehaviour
 
         if (GameManager.instance != null) GameManager.instance.UpdateHPUI(currentHealth, maxHealth);
 
+        // 觸發受傷閃爍
+        if (gameObject.activeInHierarchy) StartCoroutine(DamageFlash());
+
         if (currentHealth <= 0)
         {
             Die();
+        }
+    }
+
+    // --- 玩家受傷閃爍 (紅色) ---
+    IEnumerator DamageFlash()
+    {
+        if (sr != null)
+        {
+            sr.color = Color.red;
+            yield return new WaitForSeconds(0.15f);
+            sr.color = Color.white;
         }
     }
 
@@ -30,7 +47,6 @@ public class PlayerHealth : MonoBehaviour
     {
         currentHealth += amount;
         if (currentHealth > maxHealth) currentHealth = maxHealth;
-        Debug.Log($"玩家恢復: {amount}！ 目前血量: {currentHealth}");
 
         if (GameManager.instance != null) GameManager.instance.UpdateHPUI(currentHealth, maxHealth);
     }

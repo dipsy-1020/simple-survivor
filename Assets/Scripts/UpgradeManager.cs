@@ -1,4 +1,4 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
 using System.Collections.Generic;
@@ -8,23 +8,26 @@ public class UpgradeManager : MonoBehaviour
 {
     public static UpgradeManager instance;
 
-    [Header("UI ¸j©w")]
+    [Header("UI ç¶å®š")]
     public GameObject upgradePanel;
     public Button[] optionButtons;
     public TextMeshProUGUI[] optionTexts;
 
-    [Header("­¸¼Cª¬ºA")]
+    [Header("é£›åŠç‹€æ…‹")]
     public int flyingSwordBurstCount = 1;
     public int flyingSwordCountPerShot = 1;
     public int flyingSwordBounceCount = 0;
 
-    [Header("ÀôÂ¶¼Cª¬ºA")]
-    public float orbitalLifestealChance = 0f;
+    [Header("ç’°ç¹åŠç‹€æ…‹")]
+    public float orbitalLifestealPercent = 0f; // æ”¹æˆè¶´æ•¸ï¼Œ0.05 ä»£è¡¨ 5%
 
-    [Header("¨t²Î³]©w")]
-    public int maxUpgradeLevel = 5; // ¨C­Ó±j¤Æ§Ş¯àªº³Ì°ªµ¥¯Å
+    [Header("ç³»çµ±è¨­å®š")]
+    public int maxUpgradeLevel = 5; // æ¯å€‹å¼·åŒ–æŠ€èƒ½çš„æœ€é«˜ç­‰ç´š
 
-    // --- ¤º³¡µ¥¯Å°lÂÜ (0¥NªíÁÙ¨S¤É¯Å¹L) ---
+    [Header("å…¨åŸŸåŠ æˆ")]
+    public float globalDamageMultiplier = 1f; // æ–°å¢é€™è¡Œï¼šåŸºç¤å‚·å®³å€ç‡
+
+    // --- å…§éƒ¨ç­‰ç´šè¿½è¹¤ (0ä»£è¡¨é‚„æ²’å‡ç´šé) ---
     private int orbitalSpeedLv = 0;
     private int orbitalCountLv = 0;
     private int orbitalScaleLv = 0;
@@ -37,13 +40,61 @@ public class UpgradeManager : MonoBehaviour
 
     void Awake() { instance = this; }
 
+    void Start()
+    {
+        int currentLevelIndex = PlayerPrefs.GetInt("SelectedLevelIndex", 0);
+        GameObject player = GameObject.FindGameObjectWithTag("Player");
+
+        if (currentLevelIndex == 1)
+        {
+            globalDamageMultiplier = 1.5f; // ç¬¬äºŒé—œï¼šå‚·å®³è®Š 1.5 å€
+            flyingSwordCountPerShot += 1;
+            swordCountLv += 1;
+            flyingSwordBounceCount += 1;
+            swordBounceLv += 1;
+            if (player != null)
+            {
+                PlayerHealth health = player.GetComponent<PlayerHealth>();
+                if (health != null) { health.maxHealth += 50; health.Heal(50); }
+                PlayerController pc = player.GetComponent<PlayerController>();
+                if (pc != null) { pc.moveSpeed += 1f; }
+            }
+        }
+        else if (currentLevelIndex == 2)
+        {
+            globalDamageMultiplier = 2.5f; // ç¬¬ä¸‰é—œï¼šå‚·å®³è®Š 2.5 å€
+            flyingSwordCountPerShot += 2;
+            flyingSwordBounceCount += 2;
+            if (player != null)
+            {
+                PlayerHealth health = player.GetComponent<PlayerHealth>();
+                if (health != null) { health.maxHealth += 100; health.Heal(100); }
+                PlayerController pc = player.GetComponent<PlayerController>();
+                if (pc != null) { pc.moveSpeed += 2f; }
+            }
+        }
+        else if (currentLevelIndex == 3)
+        {
+            globalDamageMultiplier = 4.0f; // ç¬¬å››é—œï¼šå‚·å®³è®Š 4 å€ (ç’°ç¹åŠç›´æ¥è®Š 100 å‚·ï¼)
+            flyingSwordCountPerShot += 2;
+            flyingSwordBounceCount += 2;
+            if (player != null)
+            {
+                PlayerHealth health = player.GetComponent<PlayerHealth>();
+                if (health != null) { health.maxHealth += 200; health.Heal(200); }
+                PlayerController pc = player.GetComponent<PlayerController>();
+                if (pc != null) { pc.moveSpeed += 3f; }
+            }
+        }
+    }
+
     public void ShowUpgradeMenu()
     {
         Time.timeScale = 0f;
         upgradePanel.SetActive(true);
 
         List<string> currentAvailableUpgrades = GetAvailableUpgrades();
-        // ¥´¶Ã¶¶§Ç¨Ã©â¥X³Ì¦h 3 ­Ó
+        // æ‰“äº‚é †åºä¸¦æŠ½å‡ºæœ€å¤š 3 å€‹
         List<string> selectedOptions = currentAvailableUpgrades.OrderBy(x => Random.value).Take(3).ToList();
 
         for (int i = 0; i < optionButtons.Length; i++)
@@ -53,7 +104,7 @@ public class UpgradeManager : MonoBehaviour
                 optionButtons[i].gameObject.SetActive(true);
                 string choice = selectedOptions[i];
 
-                // Åı«ö¶sÅã¥Ü±a¦³¡uµ¥¯Å¡vªº¤å¦r
+                // è®“æŒ‰éˆ•é¡¯ç¤ºå¸¶æœ‰ã€Œç­‰ç´šã€çš„æ–‡å­—
                 optionTexts[i].text = GetUpgradeDisplayText(choice);
 
                 optionButtons[i].onClick.RemoveAllListeners();
@@ -61,55 +112,55 @@ public class UpgradeManager : MonoBehaviour
             }
             else
             {
-                optionButtons[i].gameObject.SetActive(false); // ¿ï¶µ¤£¨¬«hÁôÂÃ
+                optionButtons[i].gameObject.SetActive(false); // é¸é …ä¸è¶³å‰‡éš±è—
             }
         }
     }
 
-    // «Ø¥ß¤É¯Å¦À¡Gº¡¯Åªº¯à¤O´N¤£·|¦A³Q¥[¶i¨Ó©âÅÒ¤F¡I
+    // å»ºç«‹å‡ç´šæ± ï¼šæ»¿ç´šçš„èƒ½åŠ›å°±ä¸æœƒå†è¢«åŠ é€²ä¾†æŠ½ç±¤äº†ï¼
     List<string> GetAvailableUpgrades()
     {
         List<string> pool = new List<string>();
 
-        // --- µL­­´Áªº«O©³¿ï¶µ (Á×§K¥ş³¡º¡¯Å«á¨SªF¦è¿ï) ---
-        pool.Add("«ì´_ 30% ¦å¶q");
-        pool.Add("´£¤É³Ì¤j¦å¶q");
+        // --- ç„¡é™æœŸçš„ä¿åº•é¸é … (é¿å…å…¨éƒ¨æ»¿ç´šå¾Œæ²’æ±è¥¿é¸) ---
+        pool.Add("æ¢å¾© 30% è¡€é‡");
+        pool.Add("æå‡æœ€å¤§è¡€é‡");
 
-        // --- ÀôÂ¶¼C ---
-        if (orbitalSpeedLv < maxUpgradeLevel) pool.Add("¼W¥[ÀôÂ¶¼CÂà³t");
-        if (orbitalCountLv < maxUpgradeLevel) pool.Add("¼W¥[ÀôÂ¶¼C¼Æ¶q");
-        if (orbitalScaleLv < maxUpgradeLevel) pool.Add("¼W¥[ÀôÂ¶¼Cªø«×");
-        if (orbitalLifestealLv < maxUpgradeLevel) pool.Add("¼W¥[ÀôÂ¶¼C§l¦å");
+        // --- ç’°ç¹åŠ ---
+        if (orbitalSpeedLv < maxUpgradeLevel) pool.Add("å¢åŠ ç’°ç¹åŠè½‰é€Ÿ");
+        if (orbitalCountLv < maxUpgradeLevel) pool.Add("å¢åŠ ç’°ç¹åŠæ•¸é‡");
+        if (orbitalScaleLv < maxUpgradeLevel) pool.Add("å¢åŠ ç’°ç¹åŠé•·åº¦");
+        if (orbitalLifestealLv < maxUpgradeLevel) pool.Add("å¢åŠ ç’°ç¹åŠå¸è¡€");
 
-        // --- ­¸¼C ---
-        if (swordCountLv < maxUpgradeLevel) pool.Add("¼W¥[­¸¼C¼Æ¶q");
-        if (swordBurstLv < maxUpgradeLevel) pool.Add("¼W¥[­¸¼Cµo®g¦¸¼Æ");
-        if (swordSpeedLv < maxUpgradeLevel) pool.Add("¼W¥[­¸¼C§ğ³t");
-        if (swordBounceLv < maxUpgradeLevel) pool.Add("¼W¥[­¸¼C¼u®g¦¸¼Æ");
+        // --- é£›åŠ ---
+        if (swordCountLv < maxUpgradeLevel) pool.Add("å¢åŠ é£›åŠæ•¸é‡");
+        if (swordBurstLv < maxUpgradeLevel) pool.Add("å¢åŠ é£›åŠç™¼å°„æ¬¡æ•¸");
+        if (swordSpeedLv < maxUpgradeLevel) pool.Add("å¢åŠ é£›åŠæ”»é€Ÿ");
+        if (swordBounceLv < maxUpgradeLevel) pool.Add("å¢åŠ é£›åŠå½ˆå°„æ¬¡æ•¸");
 
         return pool;
     }
 
-    // ­t³d³B²z UI ­nÅã¥Üªº¤å¦r (¨Ò¦p "¼W¥[­¸¼C¼Æ¶q (Lv.2)")
+    // è² è²¬è™•ç† UI è¦é¡¯ç¤ºçš„æ–‡å­— (ä¾‹å¦‚ "å¢åŠ é£›åŠæ•¸é‡ (Lv.2)")
     string GetUpgradeDisplayText(string choice)
     {
         switch (choice)
         {
-            case "¼W¥[ÀôÂ¶¼CÂà³t": return $"{choice} (Lv.{orbitalSpeedLv + 1})";
-            case "¼W¥[ÀôÂ¶¼C¼Æ¶q": return $"{choice} (Lv.{orbitalCountLv + 1})";
-            case "¼W¥[ÀôÂ¶¼Cªø«×": return $"{choice} (Lv.{orbitalScaleLv + 1})";
-            case "¼W¥[ÀôÂ¶¼C§l¦å": return $"{choice} (Lv.{orbitalLifestealLv + 1})";
+            case "å¢åŠ ç’°ç¹åŠè½‰é€Ÿ": return $"{choice} (Lv.{orbitalSpeedLv + 1})";
+            case "å¢åŠ ç’°ç¹åŠæ•¸é‡": return $"{choice} (Lv.{orbitalCountLv + 1})";
+            case "å¢åŠ ç’°ç¹åŠé•·åº¦": return $"{choice} (Lv.{orbitalScaleLv + 1})";
+            case "å¢åŠ ç’°ç¹åŠå¸è¡€": return $"{choice} (Lv.{orbitalLifestealLv + 1})";
 
-            case "¼W¥[­¸¼C¼Æ¶q": return $"{choice} (Lv.{swordCountLv + 1})";
-            case "¼W¥[­¸¼Cµo®g¦¸¼Æ": return $"{choice} (Lv.{swordBurstLv + 1})";
-            case "¼W¥[­¸¼C§ğ³t": return $"{choice} (Lv.{swordSpeedLv + 1})";
-            case "¼W¥[­¸¼C¼u®g¦¸¼Æ": return $"{choice} (Lv.{swordBounceLv + 1})";
+            case "å¢åŠ é£›åŠæ•¸é‡": return $"{choice} (Lv.{swordCountLv + 1})";
+            case "å¢åŠ é£›åŠç™¼å°„æ¬¡æ•¸": return $"{choice} (Lv.{swordBurstLv + 1})";
+            case "å¢åŠ é£›åŠæ”»é€Ÿ": return $"{choice} (Lv.{swordSpeedLv + 1})";
+            case "å¢åŠ é£›åŠå½ˆå°„æ¬¡æ•¸": return $"{choice} (Lv.{swordBounceLv + 1})";
 
-            default: return choice; // ¨ä¥L¨S¦³µ¥¯Åªº¿ï¶µ (¨Ò¦p¸É¦å)
+            default: return choice; // å…¶ä»–æ²’æœ‰ç­‰ç´šçš„é¸é … (ä¾‹å¦‚è£œè¡€)
         }
     }
 
-    // ¹ê»Úµ¹¤©¯à¤O»P¼Æ­È±j¤Æ
+    // å¯¦éš›çµ¦äºˆèƒ½åŠ›èˆ‡æ•¸å€¼å¼·åŒ–
     void ApplyUpgrade(string upgradeName)
     {
         GameObject player = GameObject.FindGameObjectWithTag("Player");
@@ -119,26 +170,26 @@ public class UpgradeManager : MonoBehaviour
 
         switch (upgradeName)
         {
-            case "«ì´_ 30% ¦å¶q":
+            case "æ¢å¾© 30% è¡€é‡":
                 if (health != null) health.Heal(Mathf.RoundToInt(health.maxHealth * 0.3f));
                 break;
-            case "´£¤É³Ì¤j¦å¶q":
+            case "æå‡æœ€å¤§è¡€é‡":
                 if (health != null)
                 {
                     health.maxHealth += 20;
-                    health.Heal(20); // ¶¶«K¸É¦^¼W¥[ªº¦å¶q
+                    health.Heal(20); // é †ä¾¿è£œå›å¢åŠ çš„è¡€é‡
                 }
                 break;
 
-            case "¼W¥[ÀôÂ¶¼CÂà³t":
+            case "å¢åŠ ç’°ç¹åŠè½‰é€Ÿ":
                 orbitalSpeedLv++;
                 if (orbital != null) orbital.rotationSpeed += 35f;
                 break;
-            case "¼W¥[ÀôÂ¶¼C¼Æ¶q":
+            case "å¢åŠ ç’°ç¹åŠæ•¸é‡":
                 orbitalCountLv++;
                 if (orbital != null) orbital.UpdateSwordCount(orbital.swordCount + 1);
                 break;
-            case "¼W¥[ÀôÂ¶¼Cªø«×":
+            case "å¢åŠ ç’°ç¹åŠé•·åº¦":
                 orbitalScaleLv++;
                 if (orbital != null)
                 {
@@ -146,24 +197,24 @@ public class UpgradeManager : MonoBehaviour
                     orbital.ApplyScale();
                 }
                 break;
-            case "¼W¥[ÀôÂ¶¼C§l¦å":
+            case "å¢åŠ ç’°ç¹åŠå¸è¡€":
                 orbitalLifestealLv++;
-                orbitalLifestealChance += 0.05f; // Lv5 = ¦³ 25% ·|¦³§l¦å®ÄªG
+                orbitalLifestealPercent += 0.03f; // æ¯å‡ 1 ç´šï¼Œå¸è¡€å¢åŠ  3% (æ»¿ç´š 15%)
                 break;
 
-            case "¼W¥[­¸¼C¼Æ¶q":
+            case "å¢åŠ é£›åŠæ•¸é‡":
                 swordCountLv++;
                 flyingSwordCountPerShot++;
                 break;
-            case "¼W¥[­¸¼Cµo®g¦¸¼Æ":
+            case "å¢åŠ é£›åŠç™¼å°„æ¬¡æ•¸":
                 swordBurstLv++;
                 flyingSwordBurstCount++;
                 break;
-            case "¼W¥[­¸¼C§ğ³t":
+            case "å¢åŠ é£›åŠæ”»é€Ÿ":
                 swordSpeedLv++;
                 if (shooter != null) shooter.fireRate = Mathf.Max(0.1f, shooter.fireRate * 0.8f);
                 break;
-            case "¼W¥[­¸¼C¼u®g¦¸¼Æ":
+            case "å¢åŠ é£›åŠå½ˆå°„æ¬¡æ•¸":
                 swordBounceLv++;
                 flyingSwordBounceCount++;
                 break;

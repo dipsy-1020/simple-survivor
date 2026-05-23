@@ -9,11 +9,12 @@ public class EnemyHealth : MonoBehaviour
 
     [Header("掉落與回饋設定")]
     public GameObject expGemPrefab;
+    public int expDropAmount = 10;      // 新增：這隻怪掉落多少經驗值？ (可以在 Unity 裡單獨調)
     public GameObject damageTextPrefab;
 
     [Header("補血道具掉落")]
-    public GameObject healItemPrefab;   // 拖入你的補血道具 Prefab
-    public float healDropChance = 0.05f; // 5% 機率掉落補血
+    public GameObject healItemPrefab;
+    public float healDropChance = 0.05f;
 
     private SpriteRenderer sr;
     private Color originalColor;
@@ -53,14 +54,19 @@ public class EnemyHealth : MonoBehaviour
 
     void Die()
     {
-        // 隨機骰一個 0.0 ~ 1.0 的數字，判斷是否掉落補血
         if (healItemPrefab != null && Random.value <= healDropChance)
         {
             Instantiate(healItemPrefab, transform.position, Quaternion.identity);
         }
         else if (expGemPrefab != null)
         {
-            Instantiate(expGemPrefab, transform.position, Quaternion.identity);
+            // 生成寶石，並把個別的經驗值傳給寶石
+            GameObject gem = Instantiate(expGemPrefab, transform.position, Quaternion.identity);
+            ExpGem gemScript = gem.GetComponent<ExpGem>();
+            if (gemScript != null)
+            {
+                gemScript.expValue = expDropAmount; // 核心修改！
+            }
         }
         Destroy(gameObject);
     }

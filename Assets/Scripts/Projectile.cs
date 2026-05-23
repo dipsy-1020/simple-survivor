@@ -45,9 +45,14 @@ public class Projectile : MonoBehaviour
             if (targetTag == "Enemy")
             {
                 EnemyHealth enemy = other.GetComponent<EnemyHealth>();
-                if (enemy != null) enemy.TakeDamage(damage);
+                if (enemy != null)
+                {
+                    // 套用倍率
+                    float multiplier = UpgradeManager.instance != null ? UpgradeManager.instance.globalDamageMultiplier : 1f;
+                    int finalDamage = Mathf.RoundToInt(damage * multiplier);
+                    enemy.TakeDamage(finalDamage);
+                }
 
-                // --- 彈射邏輯 ---
                 if (bounceRemaining > 0)
                 {
                     bounceRemaining--;
@@ -55,11 +60,12 @@ public class Projectile : MonoBehaviour
                 }
                 else
                 {
-                    Destroy(gameObject); // 沒有彈射次數了就乖乖銷毀
+                    Destroy(gameObject);
                 }
             }
             else if (targetTag == "Player")
             {
+                // 怪物的子彈打玩家，不套用加成
                 PlayerHealth player = other.GetComponent<PlayerHealth>();
                 if (player != null) player.TakeDamage(damage);
                 Destroy(gameObject);

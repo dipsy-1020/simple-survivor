@@ -2,13 +2,16 @@ using UnityEngine;
 
 public class DashAI : MonoBehaviour
 {
-    [Header("��¦�]�w")]
+    [Header("移動設定")]
     public float normalSpeed = 2.5f;
-    public int damage = 15;
+
+    [Header("傷害設定")]
+    public int normalDamage = 10;       // 普攻傷害
+    public int dashDamage = 20;         // 新增：衝撞傷害
     public float damageCooldown = 1f;
     private float lastDamageTime;
 
-    [Header("�Ĩ�ޯ�")]
+    [Header("衝刺技能")]
     public float dashSpeed = 10f;
     public float dashDuration = 0.5f;
     public float dashCooldown = 4f;
@@ -48,7 +51,6 @@ public class DashAI : MonoBehaviour
             {
                 isDashing = false;
                 dashCooldownTimer = dashCooldown;
-                // �Ĩ뵲���ɪ����M�ųt�סA����D�ʷƦ�
                 rb.linearVelocity = Vector2.zero;
             }
         }
@@ -74,7 +76,9 @@ public class DashAI : MonoBehaviour
             PlayerHealth ph = collision.gameObject.GetComponent<PlayerHealth>();
             if (ph != null)
             {
-                ph.TakeDamage(damage);
+                // --- 重點修改：根據狀態決定傷害 ---
+                int finalDamage = isDashing ? dashDamage : normalDamage;
+                ph.TakeDamage(finalDamage);
                 lastDamageTime = Time.time;
             }
         }

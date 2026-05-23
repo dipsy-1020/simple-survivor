@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 5631108045860799101}
   - component: {fileID: 4322306133419166010}
   - component: {fileID: 2106339978715968114}
-  - component: {fileID: -6406034014448741373}
+  - component: {fileID: 2778802786806917091}
   m_Layer: 0
   m_Name: ghost
   m_TagString: Enemy
@@ -31,8 +31,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -20.441303, y: -12.873613, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 0.8, y: 0.8, z: 0.8}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -171,12 +171,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 152f17e2f001b66439a920bfd42d0dad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 50
+  maxHealth: 1500
   expGemPrefab: {fileID: 6922196530758687321, guid: 0c88636f0f514804c90716e71a67ccaf, type: 3}
+  expDropAmount: 400
   damageTextPrefab: {fileID: 7675475905614218229, guid: e8f4e5cb1a9de2442aabced2d437a603, type: 3}
   healItemPrefab: {fileID: 6922196530758687321, guid: f21d868d09b900b4897a593a48f8720d, type: 3}
   healDropChance: 0.05
---- !u!114 &-6406034014448741373
+--- !u!114 &2778802786806917091
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -185,10 +186,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 413850948191185313}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: f4a43f5a56d50864aa18dd496bb9b5e8, type: 3}
+  m_Script: {fileID: 11500000, guid: 388501d9783c902498f378d224bfcc36, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::RangedAI
-  speed: 3
-  stopDistance: 5
-  projectilePrefab: {fileID: 7582529407957700068, guid: 53444901c09372b4c98be36f6cdcfd57, type: 3}
-  fireRate: 0.75
+  m_EditorClassIdentifier: Assembly-CSharp::GhostBoss
+  speed: 2.8
+  touchDamage: 20
+  touchCooldown: 1
+  teleportCooldown: 5

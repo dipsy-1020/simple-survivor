@@ -2,7 +2,6 @@ using UnityEngine;
 
 public class OrbitalWeapon : MonoBehaviour
 {
-    [Header("傷害設定")]
     public int damage = 15;
 
     void OnTriggerEnter2D(Collider2D other)
@@ -12,17 +11,23 @@ public class OrbitalWeapon : MonoBehaviour
             EnemyHealth enemy = other.GetComponent<EnemyHealth>();
             if (enemy != null)
             {
-                enemy.TakeDamage(damage);
+                // 套用倍率
+                float multiplier = UpgradeManager.instance != null ? UpgradeManager.instance.globalDamageMultiplier : 1f;
+                int finalDamage = Mathf.RoundToInt(damage * multiplier);
 
-                // --- 吸血邏輯 ---
-                // Random.value 會產生 0.0 ~ 1.0 的隨機數
-                if (Random.value < UpgradeManager.instance.orbitalLifestealChance)
+                enemy.TakeDamage(finalDamage);
+
+                // 吸血邏輯
+                if (UpgradeManager.instance != null && UpgradeManager.instance.orbitalLifestealPercent > 0)
                 {
-                    GameObject player = GameObject.FindGameObjectWithTag("Player");
-                    if (player != null)
+                    float healRaw = finalDamage * UpgradeManager.instance.orbitalLifestealPercent;
+                    int actualHeal = Mathf.FloorToInt(healRaw);
+                    if (Random.value < (healRaw - actualHeal)) actualHeal += 1;
+
+                    if (actualHeal > 0)
                     {
-                        PlayerHealth ph = player.GetComponent<PlayerHealth>();
-                        if (ph != null) ph.Heal(5); // 觸發吸血，固定補 5 滴血
+                        PlayerHealth player = GameObject.FindGameObjectWithTag("Player").GetComponent<PlayerHealth>();
+                        if (player != null) player.Heal(actualHeal);
                     }
                 }
             }

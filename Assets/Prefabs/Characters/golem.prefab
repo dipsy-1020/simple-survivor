@@ -31,8 +31,8 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: -3.6687562, y: -2.0600357, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
+  m_LocalScale: {x: 1.5, y: 1.5, z: 1.5}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -171,8 +171,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 152f17e2f001b66439a920bfd42d0dad, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyHealth
-  maxHealth: 40
+  maxHealth: 300
   expGemPrefab: {fileID: 6922196530758687321, guid: 0c88636f0f514804c90716e71a67ccaf, type: 3}
+  expDropAmount: 30
   damageTextPrefab: {fileID: 7675475905614218229, guid: e8f4e5cb1a9de2442aabced2d437a603, type: 3}
   healItemPrefab: {fileID: 6922196530758687321, guid: f21d868d09b900b4897a593a48f8720d, type: 3}
   healDropChance: 0.05
@@ -188,7 +189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 387fbd1132280f74ab7a16006edf7f72, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::MeleeAI
-  speed: 2.5
+  speed: 1.2
   stopDistance: 0.5
-  damage: 18
+  damage: 20
   damageCooldown: 1

@@ -1,24 +1,31 @@
-using UnityEngine;
+ï»¿using UnityEngine;
 
 public class WizardBoss : MonoBehaviour
 {
-    [Header("²¾°Ê³]©w")]
+    [Header("ç§»å‹•è¨­å®š")]
     public float speed = 2f;
-    public float keepDistance = 6f; // ·Q­n¸òª±®a«O«ùªº¶ZÂ÷
+    public float keepDistance = 6f;
 
-    [Header("®°§Î¼u¹õ§Ş¯à")]
-    public GameObject projectilePrefab; // ©ì¤J©Çª«ªº¤l¼u Prefab
+    [Header("ç¢°æ’å‚·å®³")]
+    public int touchDamage = 30;
+    public float touchCooldown = 1f;
+    private float lastTouchTime;
+
+    [Header("æ‰‡å½¢å½ˆå¹•æŠ€èƒ½")]
+    public GameObject projectilePrefab;
     public float fireCooldown = 3f;
-    public int projectileCount = 5;     // ¤@¦¸µo®g´Xµo
-    public float spreadAngle = 60f;     // ®°§Î´²§GªºÁ`¨¤«×
+    public int projectileCount = 5;
+    public float spreadAngle = 60f;
+
+    // ğŸ‘‡ æ–°å¢ï¼šå­å½ˆå°ˆå±¬å‚·å®³
+    public int bulletDamage = 25;
     private float fireTimer;
 
-    [Header("Àş²¾¨¾¨­ (¿ï¶ñ)")]
-    [Tooltip("¦pªGª±®a¤Ó¾aªñ¡A´X¬í¯àÀş²¾¤@¦¸")]
+    [Header("ç¬ç§»é˜²èº«")]
     public float teleportCooldown = 5f;
-    public float triggerTeleportDistance = 3f; // ª±®a¾a¦hªñ·|Ä²µo
-    public Vector2 fieldMin; // ³õ¦a¥ª¤UÃä¬É (¦P Spawner ³]©w)
-    public Vector2 fieldMax; // ³õ¦a¥k¤WÃä¬É
+    public float triggerTeleportDistance = 3f;
+    public Vector2 fieldMin;
+    public Vector2 fieldMax;
     private float tpTimer;
 
     private Transform player;
@@ -40,13 +47,11 @@ public class WizardBoss : MonoBehaviour
     {
         if (player == null) return;
 
-        // ÀH®É­±´Âª±®a
         Vector2 directionToPlayer = player.position - transform.position;
         if (directionToPlayer.x != 0) sr.flipX = directionToPlayer.x < 0;
 
         float distance = directionToPlayer.magnitude;
 
-        // «O«ù¶ZÂ÷ÅŞ¿è¡G¦pªG¤j©ó¦w¥ş¶ZÂ÷´N¾aªñ¡A¤p©ó´N«á°h
         if (distance > keepDistance + 0.5f)
         {
             rb.MovePosition(rb.position + directionToPlayer.normalized * speed * Time.fixedDeltaTime);
@@ -61,7 +66,6 @@ public class WizardBoss : MonoBehaviour
     {
         if (player == null) return;
 
-        // 1. ¼u¹õ®gÀ»­p®É
         fireTimer -= Time.deltaTime;
         if (fireTimer <= 0)
         {
@@ -69,7 +73,6 @@ public class WizardBoss : MonoBehaviour
             fireTimer = fireCooldown;
         }
 
-        // 2. Àş²¾­p®É»PÄ²µo
         tpTimer -= Time.deltaTime;
         float distance = Vector2.Distance(transform.position, player.position);
         if (distance <= triggerTeleportDistance && tpTimer <= 0)
@@ -83,13 +86,11 @@ public class WizardBoss : MonoBehaviour
     {
         if (projectilePrefab == null) return;
 
-        // ­pºâ´Â¦Vª±®aªº¤¤¤ß°ò·Ç¨¤«×
         Vector2 baseDirection = (player.position - transform.position).normalized;
         float baseAngle = Mathf.Atan2(baseDirection.y, baseDirection.x) * Mathf.Rad2Deg;
 
-        // ­pºâ¨C¤@µo¤l¼uªº¨¤«×¶¡¹j
         float startAngle = baseAngle - (spreadAngle / 2f);
-        float angleStep = spreadAngle / (projectileCount - 1); // ´î1¬O¬°¤F¥­§¡¤À°t¦bÃä¬É
+        float angleStep = spreadAngle / (projectileCount - 1);
 
         for (int i = 0; i < projectileCount; i++)
         {
@@ -100,7 +101,9 @@ public class WizardBoss : MonoBehaviour
             Projectile proj = bullet.GetComponent<Projectile>();
             if (proj != null)
             {
-                proj.targetTag = "Player"; // ½T«O¥´¦bª±®a¨­¤W
+                proj.targetTag = "Player";
+                // ğŸ‘‡ é‡é»ä¿®å¾©ï¼šè³¦äºˆå­å½ˆè¨­å®šå¥½çš„å‚·å®³
+                proj.damage = bulletDamage;
                 proj.Initialize(bulletDir);
             }
         }
@@ -108,10 +111,17 @@ public class WizardBoss : MonoBehaviour
 
     void TeleportAway()
     {
-        // ÀH¾÷¶Ç°e¨ì³õ¦a¤ºªº·s¦ì¸m
         float rx = Random.Range(fieldMin.x, fieldMax.x);
         float ry = Random.Range(fieldMin.y, fieldMax.y);
         transform.position = new Vector2(rx, ry);
-        // ¥¼¨Ó¥i¥H¥[¤WÀş²¾¯S®Ä
+    }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player") && Time.time >= lastTouchTime + touchCooldown)
+        {
+            PlayerHealth ph = collision.gameObject.GetComponent<PlayerHealth>();
+            if (ph != null) { ph.TakeDamage(touchDamage); lastTouchTime = Time.time; }
+        }
     }
 }

@@ -9,7 +9,15 @@ public class RangedAI : MonoBehaviour
     [Header("射擊設定")]
     public GameObject projectilePrefab;
     public float fireRate = 2f;
+
+    // 👇 新增：子彈專屬傷害
+    public int bulletDamage = 10;
     private float fireTimer;
+
+    [Header("碰撞傷害")]
+    public int touchDamage = 10;
+    public float touchCooldown = 1f;
+    private float lastTouchTime;
 
     private Transform player;
     private Rigidbody2D rb;
@@ -28,7 +36,6 @@ public class RangedAI : MonoBehaviour
     {
         if (player == null) return;
 
-        // 隨時面朝玩家
         float dirX = player.position.x - transform.position.x;
         if (dirX != 0) sr.flipX = dirX < 0;
 
@@ -36,13 +43,11 @@ public class RangedAI : MonoBehaviour
 
         if (distanceToPlayer > stopDistance)
         {
-            // 距離大於 stopDistance：走向玩家
             Vector2 direction = (player.position - transform.position).normalized;
             rb.MovePosition(rb.position + direction * speed * Time.fixedDeltaTime);
         }
         else
         {
-            // 進入射程內：確保速度歸零，穩穩停在原地，不後退逃跑
             rb.linearVelocity = Vector2.zero;
         }
     }
@@ -72,7 +77,18 @@ public class RangedAI : MonoBehaviour
         if (proj != null)
         {
             proj.targetTag = "Player";
+            // 👇 重點修復：賦予子彈設定好的傷害
+            proj.damage = bulletDamage;
             proj.Initialize(direction);
+        }
+    }
+
+    void OnCollisionStay2D(Collision2D collision)
+    {
+        if (collision.gameObject.CompareTag("Player") && Time.time >= lastTouchTime + touchCooldown)
+        {
+            PlayerHealth ph = collision.gameObject.GetComponent<PlayerHealth>();
+            if (ph != null) { ph.TakeDamage(touchDamage); lastTouchTime = Time.time; }
         }
     }
 }

@@ -33994,6 +33994,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerHealth
   maxHealth: 100
+  invincibilityTime: 0.5
 --- !u!1 &704591773
 GameObject:
   m_ObjectHideFlags: 0
@@ -38718,7 +38719,7 @@ MonoBehaviour:
     - {fileID: 413850948191185313, guid: 391bc661f8e49164ba33488c9ee97420, type: 3}
     - {fileID: 413850948191185313, guid: ff4e8837cb42e0343b807da912d3edb6, type: 3}
     - {fileID: 413850948191185313, guid: a7d0bb58e7a163c4d91b0b827529a48d, type: 3}
-    eliteSpawnInterval: 15
+    eliteSpawnInterval: 20
     elitePool: []
     eliteTimer: 0
     bossPrefab: {fileID: 413850948191185313, guid: cc358d4bf68caba41abc6b43d08ef86d, type: 3}
@@ -38731,7 +38732,7 @@ MonoBehaviour:
     - {fileID: 413850948191185313, guid: ff4e8837cb42e0343b807da912d3edb6, type: 3}
     - {fileID: 413850948191185313, guid: a7d0bb58e7a163c4d91b0b827529a48d, type: 3}
     - {fileID: 413850948191185313, guid: 3ad62163c9a88ad43a9dba8f04391ab7, type: 3}
-    eliteSpawnInterval: 20
+    eliteSpawnInterval: 15
     elitePool:
     - {fileID: 413850948191185313, guid: cc358d4bf68caba41abc6b43d08ef86d, type: 3}
     eliteTimer: 0
@@ -38745,7 +38746,7 @@ MonoBehaviour:
     - {fileID: 413850948191185313, guid: a7d0bb58e7a163c4d91b0b827529a48d, type: 3}
     - {fileID: 413850948191185313, guid: 3ad62163c9a88ad43a9dba8f04391ab7, type: 3}
     - {fileID: 3348967974901220538, guid: 89f8db0b2b208784284768d504485a6a, type: 3}
-    eliteSpawnInterval: 18
+    eliteSpawnInterval: 10
     elitePool:
     - {fileID: 413850948191185313, guid: 326a8ce5ab9327e4da89bda3aa1f2fb0, type: 3}
     - {fileID: 413850948191185313, guid: 23fc59ba01096724b9a585fcb37ee3b0, type: 3}
@@ -38760,7 +38761,7 @@ MonoBehaviour:
     - {fileID: 3348967974901220538, guid: 89f8db0b2b208784284768d504485a6a, type: 3}
     - {fileID: 413850948191185313, guid: a7d0bb58e7a163c4d91b0b827529a48d, type: 3}
     - {fileID: 413850948191185313, guid: 23fc59ba01096724b9a585fcb37ee3b0, type: 3}
-    eliteSpawnInterval: 15
+    eliteSpawnInterval: 5
     elitePool:
     - {fileID: 413850948191185313, guid: ee2fd01d9d6467943abc86d6852a31b6, type: 3}
     - {fileID: 413850948191185313, guid: 326a8ce5ab9327e4da89bda3aa1f2fb0, type: 3}
@@ -38799,6 +38800,7 @@ MonoBehaviour:
   flyingSwordBounceCount: 0
   orbitalLifestealPercent: 0
   maxUpgradeLevel: 5
+  globalDamageMultiplier: 1
 --- !u!114 &1512564902
 MonoBehaviour:
   m_ObjectHideFlags: 0
